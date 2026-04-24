@@ -9,7 +9,11 @@ load_dotenv()
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 from app.core.database import Base
-from app.models.models import ProcurementOrder
+# from app.models.models import ProcurementOrder
+from app.models.layer0 import *
+from app.models.layer1 import *
+from app.models.layer4 import *
+
 
 config = context.config
 target_metadata = Base.metadata
