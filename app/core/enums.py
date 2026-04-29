@@ -177,3 +177,79 @@ class AuditAction(str, enum.Enum):
     CONFIG_RELOAD = "CONFIG_RELOAD"
     LOGIN = "LOGIN"
     LOGOUT = "LOGOUT"
+
+
+# === Procurement & Supply Chain (Diagram 6/13) ===
+
+class POStatus(str, enum.Enum):
+    """Purchase Order lifecycle states per design doc PO state machine."""
+    DRAFT = "DRAFT"
+    PENDING_APPROVAL = "PENDING_APPROVAL"
+    APPROVED = "APPROVED"
+    DISPATCHED = "DISPATCHED"
+    ACKNOWLEDGED = "ACKNOWLEDGED"
+    PARTIALLY_DELIVERED = "PARTIALLY_DELIVERED"
+    DELIVERED = "DELIVERED"
+    UNDER_INSPECTION = "UNDER_INSPECTION"
+    CLOSED = "CLOSED"
+    CANCELLED = "CANCELLED"
+
+
+class VendorStatus(str, enum.Enum):
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    BLACKLISTED = "BLACKLISTED"
+    UNDER_REVIEW = "UNDER_REVIEW"
+
+
+class VendorTier(str, enum.Enum):
+    """Vendor classification by performance. Thresholds: T1 >= 80, T2 >= 60, T3 < 60."""
+    TIER_1 = "TIER_1"
+    TIER_2 = "TIER_2"
+    TIER_3 = "TIER_3"
+
+
+class DeliveryStatus(str, enum.Enum):
+    SCHEDULED = "SCHEDULED"
+    IN_TRANSIT = "IN_TRANSIT"
+    DELIVERED = "DELIVERED"
+    PARTIALLY_DELIVERED = "PARTIALLY_DELIVERED"
+    REJECTED = "REJECTED"
+
+
+class FATStatus(str, enum.Enum):
+    """Factory Acceptance Test lifecycle (W11)."""
+    SCHEDULED = "SCHEDULED"
+    NOTICE_SENT = "NOTICE_SENT"
+    IN_PROGRESS = "IN_PROGRESS"
+    PASSED = "PASSED"
+    FAILED = "FAILED"
+    CONDITIONALLY_PASSED = "CONDITIONALLY_PASSED"
+    RETEST_SCHEDULED = "RETEST_SCHEDULED"
+
+
+class ApprovalStatus(str, enum.Enum):
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+    ESCALATED = "ESCALATED"
+
+
+class MaterialCategory(str, enum.Enum):
+    STRUCTURAL = "STRUCTURAL"
+    ELECTRICAL = "ELECTRICAL"
+    MECHANICAL = "MECHANICAL"
+    SIGNALING = "SIGNALING"
+    TELECOM = "TELECOM"
+    TRACK = "TRACK"
+    ROLLING_STOCK = "ROLLING_STOCK"
+    CIVIL = "CIVIL"
+    OTHER = "OTHER"
+
+
+class CurrencyCode(str, enum.Enum):
+    INR = "INR"
+    USD = "USD"
+    EUR = "EUR"
+    GBP = "GBP"
+    JPY = "JPY"
