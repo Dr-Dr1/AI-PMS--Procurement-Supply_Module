@@ -1,8 +1,8 @@
 """
 Procurement Repositories — Data access layer.
 
-Each repository encapsulates all database operations for its domain entity.
-All queries use SQLAlchemy async patterns with the session injected via DI.
+Each repository encapsulates all DB operations for its domain entity.
+Uses SQLAlchemy async sessions throughout.
 """
 
 from __future__ import annotations
@@ -22,9 +22,7 @@ from app.models.procurement import (
 from app.models.models import ProcurementOrder
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Vendor Repository
-# ═══════════════════════════════════════════════════════════════════════════════
+# ─── Vendor Repository ─────────────────────────────────────────────────────────
 
 class VendorRepository:
     def __init__(self, db: AsyncSession):
@@ -37,9 +35,15 @@ class VendorRepository:
         await self.db.refresh(vendor)
         return vendor
 
-    async def get_by_id(self, vendor_id: uuid.UUID) -> Vendor | None:
+    async def get_by_id(self, vendor_id: uuid.UUID) -> Optional[Vendor]:
         result = await self.db.execute(
             select(Vendor).where(Vendor.id == vendor_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def get_by_code(self, code: str) -> Optional[Vendor]:
+        result = await self.db.execute(
+            select(Vendor).where(Vendor.code == code)
         )
         return result.scalar_one_or_none()
 
@@ -60,13 +64,13 @@ class VendorRepository:
             query = query.where(Vendor.is_active == is_active)
             count_query = count_query.where(Vendor.is_active == is_active)
 
-        total = (await self.db.execute(count_query)).scalar()
+        total = (await self.db.execute(count_query)).scalar() or 0
         result = await self.db.execute(
             query.order_by(Vendor.created_at.desc()).offset(skip).limit(limit)
         )
         return result.scalars().all(), total
 
-    async def update(self, vendor_id: uuid.UUID, **kwargs) -> Vendor | None:
+    async def update(self, vendor_id: uuid.UUID, **kwargs) -> Optional[Vendor]:
         vendor = await self.get_by_id(vendor_id)
         if not vendor:
             return None
@@ -77,25 +81,15 @@ class VendorRepository:
         await self.db.refresh(vendor)
         return vendor
 
-    async def delete(self, vendor_id: uuid.UUID) -> bool:
-        vendor = await self.get_by_id(vendor_id)
-        if not vendor:
-            return False
-        await self.db.delete(vendor)
-        await self.db.commit()
-        return True
-
     async def count(self, is_active: Optional[bool] = None) -> int:
         query = select(func.count(Vendor.id))
         if is_active is not None:
             query = query.where(Vendor.is_active == is_active)
         result = await self.db.execute(query)
-        return result.scalar()
+        return result.scalar() or 0
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Material Repository
-# ═══════════════════════════════════════════════════════════════════════════════
+# ─── Material Repository ───────────────────────────────────────────────────────
 
 class MaterialRepository:
     def __init__(self, db: AsyncSession):
@@ -108,9 +102,15 @@ class MaterialRepository:
         await self.db.refresh(material)
         return material
 
-    async def get_by_id(self, material_id: uuid.UUID) -> Material | None:
+    async def get_by_id(self, material_id: uuid.UUID) -> Optional[Material]:
         result = await self.db.execute(
             select(Material).where(Material.id == material_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def get_by_code(self, code: str) -> Optional[Material]:
+        result = await self.db.execute(
+            select(Material).where(Material.code == code)
         )
         return result.scalar_one_or_none()
 
@@ -131,13 +131,13 @@ class MaterialRepository:
             query = query.where(Material.is_active == is_active)
             count_query = count_query.where(Material.is_active == is_active)
 
-        total = (await self.db.execute(count_query)).scalar()
+        total = (await self.db.execute(count_query)).scalar() or 0
         result = await self.db.execute(
             query.order_by(Material.created_at.desc()).offset(skip).limit(limit)
         )
         return result.scalars().all(), total
 
-    async def update(self, material_id: uuid.UUID, **kwargs) -> Material | None:
+    async def update(self, material_id: uuid.UUID, **kwargs) -> Optional[Material]:
         material = await self.get_by_id(material_id)
         if not material:
             return None
@@ -150,48 +150,47 @@ class MaterialRepository:
 
     async def count(self) -> int:
         result = await self.db.execute(select(func.count(Material.id)))
-        return result.scalar()
+        return result.scalar() or 0
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Purchase Order Repository
-# ═══════════════════════════════════════════════════════════════════════════════
+# ─── Purchase Order Repository ─────────────────────────────────────────────────
 
 class PurchaseOrderRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create(self, line_items_data: list[dict] | None = None, **kwargs) -> PurchaseOrder:
+    async def create(self, line_items_data: list[dict], **kwargs) -> PurchaseOrder:
+        """Create PO with nested line items in a single transaction."""
         po = PurchaseOrder(**kwargs)
-        self.db.add(po)
-        await self.db.flush()  # Get the PO id before adding line items
 
-        total_value = Decimal("0.00")
-        if line_items_data:
-            for item_data in line_items_data:
-                item_total = item_data["quantity"] * item_data["unit_price"]
-                line_item = POLineItem(
-                    po_id=po.id,
-                    material_id=item_data["material_id"],
-                    description=item_data.get("description"),
-                    quantity=item_data["quantity"],
-                    unit_price=item_data["unit_price"],
-                    total_price=item_total,
-                    unit=item_data["unit"],
-                )
-                self.db.add(line_item)
-                total_value += item_total
+        # Calculate total and create line items
+        total_value = Decimal("0")
+        for item_data in line_items_data:
+            item_total = item_data["quantity"] * item_data["unit_price"]
+            line_item = POLineItem(
+                **item_data,
+                total_price=item_total,
+            )
+            po.line_items.append(line_item)
+            total_value += item_total
 
         po.total_value = total_value
+        self.db.add(po)
         await self.db.commit()
         await self.db.refresh(po)
         return po
 
-    async def get_by_id(self, po_id: uuid.UUID) -> PurchaseOrder | None:
+    async def get_by_id(self, po_id: uuid.UUID) -> Optional[PurchaseOrder]:
         result = await self.db.execute(
             select(PurchaseOrder)
             .options(selectinload(PurchaseOrder.line_items))
             .where(PurchaseOrder.id == po_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def get_by_po_number(self, po_number: str) -> Optional[PurchaseOrder]:
+        result = await self.db.execute(
+            select(PurchaseOrder).where(PurchaseOrder.po_number == po_number)
         )
         return result.scalar_one_or_none()
 
@@ -212,13 +211,13 @@ class PurchaseOrderRepository:
             query = query.where(PurchaseOrder.vendor_id == vendor_id)
             count_query = count_query.where(PurchaseOrder.vendor_id == vendor_id)
 
-        total = (await self.db.execute(count_query)).scalar()
+        total = (await self.db.execute(count_query)).scalar() or 0
         result = await self.db.execute(
             query.order_by(PurchaseOrder.created_at.desc()).offset(skip).limit(limit)
         )
         return result.scalars().all(), total
 
-    async def update(self, po_id: uuid.UUID, **kwargs) -> PurchaseOrder | None:
+    async def update(self, po_id: uuid.UUID, **kwargs) -> Optional[PurchaseOrder]:
         po = await self.get_by_id(po_id)
         if not po:
             return None
@@ -229,16 +228,28 @@ class PurchaseOrderRepository:
         await self.db.refresh(po)
         return po
 
-    async def update_status(self, po_id: uuid.UUID, status: str) -> PurchaseOrder | None:
+    async def update_status(
+        self, po_id: uuid.UUID, status: str, **extra
+    ) -> Optional[PurchaseOrder]:
         po = await self.get_by_id(po_id)
         if not po:
             return None
         po.status = status
+        for key, value in extra.items():
+            if value is not None:
+                setattr(po, key, value)
         await self.db.commit()
         await self.db.refresh(po)
         return po
 
+    async def count(self, status: Optional[str] = None) -> int:
+        query = select(func.count(PurchaseOrder.id))
+        if status:
+            query = query.where(PurchaseOrder.status == status)
+        return (await self.db.execute(query)).scalar() or 0
+
     async def count_by_status(self) -> dict[str, int]:
+        """Return {status: count} for all statuses with at least one PO."""
         result = await self.db.execute(
             select(PurchaseOrder.status, func.count(PurchaseOrder.id))
             .group_by(PurchaseOrder.status)
@@ -249,39 +260,25 @@ class PurchaseOrderRepository:
         result = await self.db.execute(
             select(func.coalesce(func.sum(PurchaseOrder.total_value), 0))
         )
-        return result.scalar()
+        return result.scalar() or Decimal("0")
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Delivery Repository
-# ═══════════════════════════════════════════════════════════════════════════════
+# ─── Delivery Repository ───────────────────────────────────────────────────────
 
 class DeliveryRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create(self, items_data: list[dict] | None = None, **kwargs) -> Delivery:
+    async def create(self, items_data: list[dict], **kwargs) -> Delivery:
         delivery = Delivery(**kwargs)
+        for item_data in items_data:
+            delivery.items.append(DeliveryItem(**item_data))
         self.db.add(delivery)
-        await self.db.flush()
-
-        if items_data:
-            for item_data in items_data:
-                item = DeliveryItem(
-                    delivery_id=delivery.id,
-                    po_line_item_id=item_data["po_line_item_id"],
-                    delivered_quantity=item_data["delivered_quantity"],
-                    accepted_quantity=item_data.get("accepted_quantity", 0),
-                    rejected_quantity=item_data.get("rejected_quantity", 0),
-                    rejection_reason=item_data.get("rejection_reason"),
-                )
-                self.db.add(item)
-
         await self.db.commit()
         await self.db.refresh(delivery)
         return delivery
 
-    async def get_by_id(self, delivery_id: uuid.UUID) -> Delivery | None:
+    async def get_by_id(self, delivery_id: uuid.UUID) -> Optional[Delivery]:
         result = await self.db.execute(
             select(Delivery)
             .options(selectinload(Delivery.items))
@@ -306,22 +303,13 @@ class DeliveryRepository:
             query = query.where(Delivery.status == status)
             count_query = count_query.where(Delivery.status == status)
 
-        total = (await self.db.execute(count_query)).scalar()
+        total = (await self.db.execute(count_query)).scalar() or 0
         result = await self.db.execute(
             query.order_by(Delivery.created_at.desc()).offset(skip).limit(limit)
         )
         return result.scalars().all(), total
 
-    async def update_status(self, delivery_id: uuid.UUID, status: str) -> Delivery | None:
-        delivery = await self.get_by_id(delivery_id)
-        if not delivery:
-            return None
-        delivery.status = status
-        await self.db.commit()
-        await self.db.refresh(delivery)
-        return delivery
-
-    async def update(self, delivery_id: uuid.UUID, **kwargs) -> Delivery | None:
+    async def update(self, delivery_id: uuid.UUID, **kwargs) -> Optional[Delivery]:
         delivery = await self.get_by_id(delivery_id)
         if not delivery:
             return None
@@ -332,18 +320,27 @@ class DeliveryRepository:
         await self.db.refresh(delivery)
         return delivery
 
+    async def update_status(
+        self, delivery_id: uuid.UUID, status: str
+    ) -> Optional[Delivery]:
+        delivery = await self.get_by_id(delivery_id)
+        if not delivery:
+            return None
+        delivery.status = status
+        await self.db.commit()
+        await self.db.refresh(delivery)
+        return delivery
+
     async def count_pending(self) -> int:
         result = await self.db.execute(
             select(func.count(Delivery.id)).where(
                 Delivery.status.in_(["SCHEDULED", "IN_TRANSIT"])
             )
         )
-        return result.scalar()
+        return result.scalar() or 0
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# FAT Test Repository
-# ═══════════════════════════════════════════════════════════════════════════════
+# ─── FAT Test Repository ───────────────────────────────────────────────────────
 
 class FATTestRepository:
     def __init__(self, db: AsyncSession):
@@ -356,7 +353,7 @@ class FATTestRepository:
         await self.db.refresh(fat)
         return fat
 
-    async def get_by_id(self, fat_id: uuid.UUID) -> FATTest | None:
+    async def get_by_id(self, fat_id: uuid.UUID) -> Optional[FATTest]:
         result = await self.db.execute(
             select(FATTest).where(FATTest.id == fat_id)
         )
@@ -383,17 +380,16 @@ class FATTestRepository:
             query = query.where(FATTest.status == status)
             count_query = count_query.where(FATTest.status == status)
 
-        total = (await self.db.execute(count_query)).scalar()
+        total = (await self.db.execute(count_query)).scalar() or 0
         result = await self.db.execute(
-            query.order_by(FATTest.scheduled_date.desc()).offset(skip).limit(limit)
+            query.order_by(FATTest.created_at.desc()).offset(skip).limit(limit)
         )
         return result.scalars().all(), total
 
-    async def update_status(self, fat_id: uuid.UUID, status: str, **kwargs) -> FATTest | None:
+    async def update(self, fat_id: uuid.UUID, **kwargs) -> Optional[FATTest]:
         fat = await self.get_by_id(fat_id)
         if not fat:
             return None
-        fat.status = status
         for key, value in kwargs.items():
             if value is not None:
                 setattr(fat, key, value)
@@ -401,18 +397,31 @@ class FATTestRepository:
         await self.db.refresh(fat)
         return fat
 
+    async def update_status(
+        self, fat_id: uuid.UUID, status: str, **extra
+    ) -> Optional[FATTest]:
+        fat = await self.get_by_id(fat_id)
+        if not fat:
+            return None
+        fat.status = status
+        for key, value in extra.items():
+            if value is not None:
+                setattr(fat, key, value)
+        await self.db.commit()
+        await self.db.refresh(fat)
+        return fat
+
     async def count_upcoming(self) -> int:
+        """Count FAT tests that are scheduled but not yet completed."""
         result = await self.db.execute(
             select(func.count(FATTest.id)).where(
                 FATTest.status.in_(["SCHEDULED", "NOTICE_SENT"])
             )
         )
-        return result.scalar()
+        return result.scalar() or 0
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Vendor Score History Repository
-# ═══════════════════════════════════════════════════════════════════════════════
+# ─── Vendor Score History Repository ────────────────────────────────────────────
 
 class VendorScoreRepository:
     def __init__(self, db: AsyncSession):
@@ -441,11 +450,11 @@ class VendorScoreRepository:
         return result.scalars().all()
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Legacy Repository (backward compat)
-# ═══════════════════════════════════════════════════════════════════════════════
+# ─── Legacy Repository (backward compat) ───────────────────────────────────────
 
 class ProcurementRepository:
+    """Legacy repository for the original ProcurementOrder model."""
+
     def __init__(self, db: AsyncSession):
         self.db = db
 
@@ -457,5 +466,5 @@ class ProcurementRepository:
         return obj
 
     async def get_all(self) -> list[ProcurementOrder]:
-        r = await self.db.execute(select(ProcurementOrder))
-        return r.scalars().all()
+        result = await self.db.execute(select(ProcurementOrder))
+        return result.scalars().all()
