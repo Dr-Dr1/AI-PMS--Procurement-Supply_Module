@@ -1,4 +1,7 @@
-const PurchaseOrdersView = {
+import { api } from '../api.js';
+import { utils, UI } from '../utils.js';
+
+export const PurchaseOrdersView = {
     render: async () => {
         utils.showLoader();
         try {
@@ -6,12 +9,7 @@ const PurchaseOrdersView = {
             try {
                 response = await api.getPurchaseOrders();
             } catch (e) {
-                response = {
-                    items: [
-                        { id: '1', po_number: 'PO-2024-001', title: 'Q1 Steel Supply', total_amount: 500000, status: 'APPROVED', created_at: '2024-04-01' },
-                        { id: '2', po_number: 'PO-2024-002', title: 'Cement Batch B', total_amount: 250000, status: 'PENDING', created_at: '2024-04-15' },
-                    ]
-                };
+                response = { items: [] };
             }
 
             const headers = ['PO Number', 'Title', 'Amount', 'Date', 'Status', 'Actions'];
@@ -27,7 +25,7 @@ const PurchaseOrdersView = {
             const html = `
                 <div class="panel-header" style="margin-bottom: var(--space-md);">
                     <h2 class="panel-title">Purchase Orders</h2>
-                    <button class="btn btn-primary" onclick="PurchaseOrdersView.showCreateModal()">
+                    <button class="btn btn-primary" id="create-po-btn">
                         <i data-lucide="plus-circle"></i> Create PO
                     </button>
                 </div>
@@ -35,7 +33,9 @@ const PurchaseOrdersView = {
             `;
             
             document.getElementById('content-area').innerHTML = html;
-            lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
+
+            document.getElementById('create-po-btn').onclick = () => PurchaseOrdersView.showCreateModal();
         } catch (error) {
             document.getElementById('content-area').innerHTML = `<p class="error">Error: ${error.message}</p>`;
         }
@@ -46,7 +46,7 @@ const PurchaseOrdersView = {
             <form id="create-po-form">
                 <div class="form-group">
                     <label>PO Title</label>
-                    <input type="text" name="title" required placeholder="e.g. Annual Steel Supply - Phase 1">
+                    <input type="text" name="title" required placeholder="e.g. Annual Steel Supply">
                 </div>
                 <div class="form-grid">
                     <div class="form-group">
@@ -62,44 +62,29 @@ const PurchaseOrdersView = {
                         </select>
                     </div>
                 </div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Expected Delivery</label>
-                        <input type="date" name="expected_delivery_date">
-                    </div>
-                    <div class="form-group">
-                        <label>Currency</label>
-                        <select name="currency">
-                            <option value="INR">INR</option>
-                            <option value="USD">USD</option>
-                            <option value="EUR">EUR</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Terms & Conditions</label>
-                    <textarea name="terms_and_conditions" rows="3"></textarea>
-                </div>
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="UI.closeModal()">Cancel</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-modal-btn">Cancel</button>
                     <button type="submit" class="btn btn-primary">Draft Purchase Order</button>
                 </div>
             </form>
         `;
         UI.openModal('Create New Purchase Order', formHtml);
         
+        document.getElementById('cancel-modal-btn').onclick = () => UI.closeModal();
+        
         document.getElementById('create-po-form').onsubmit = async (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
-            data.line_items = []; // Basic implementation
+            data.line_items = []; 
             
             try {
                 await api.createPurchaseOrder(data);
+                UI.showToast('Purchase Order created!', 'success');
                 UI.closeModal();
                 PurchaseOrdersView.render();
             } catch (err) {
-                alert('Failed to create PO: ' + err.message);
+                UI.showToast('Failed to create PO: ' + err.message, 'error');
             }
         };
     }

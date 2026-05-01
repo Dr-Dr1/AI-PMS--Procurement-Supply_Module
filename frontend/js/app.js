@@ -1,15 +1,46 @@
+import { UI } from './utils.js';
+import { DashboardView } from './views/dashboard.js';
+import { VendorsView } from './views/vendors.js';
+import { MaterialsView } from './views/materials.js';
+import { PurchaseOrdersView } from './views/purchase-orders.js';
+import { DeliveriesView } from './views/deliveries.js';
+import { FATTestsView } from './views/fat-tests.js';
+
 const App = {
+    views: {
+        dashboard: DashboardView,
+        vendors: VendorsView,
+        materials: MaterialsView,
+        'purchase-orders': PurchaseOrdersView,
+        deliveries: DeliveriesView,
+        'fat-tests': FATTestsView
+    },
+
     init: () => {
         // Initialize Lucide icons on start
-        lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons();
 
         // Handle navigation
         window.addEventListener('hashchange', App.handleRoute);
         
+        // Listen for internal links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                const target = e.currentTarget.getAttribute('data-link');
+                if (target) {
+                    window.location.hash = target;
+                }
+            });
+        });
+
+        // Close modal setup
+        const closeBtn = document.getElementById('close-modal-btn');
+        if (closeBtn) closeBtn.onclick = () => UI.closeModal();
+
         // Initial route
         App.handleRoute();
 
-        console.log('AI-PMS Frontend Initialized');
+        console.log('AI-PMS Frontend Module System Initialized');
     },
 
     handleRoute: () => {
@@ -31,30 +62,11 @@ const App = {
         }
 
         // Route to correct view
-        switch(page) {
-            case 'dashboard':
-                DashboardView.render();
-                break;
-            case 'vendors':
-                VendorsView.render();
-                break;
-            case 'materials':
-                MaterialsView.render();
-                break;
-            case 'purchase-orders':
-                PurchaseOrdersView.render();
-                break;
-            case 'deliveries':
-                DeliveriesView.render();
-                break;
-            case 'fat-tests':
-                FATTestsView.render();
-                break;
-            default:
-                DashboardView.render();
-        }
+        const view = App.views[page] || DashboardView;
+        view.render();
     }
 };
 
 // Start the app when DOM is ready
 document.addEventListener('DOMContentLoaded', App.init);
+export default App;

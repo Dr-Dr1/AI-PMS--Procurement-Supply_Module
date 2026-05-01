@@ -1,9 +1,9 @@
-const utils = {
+export const utils = {
     formatCurrency: (amount, currency = 'INR') => {
         return new Intl.NumberFormat('en-IN', {
             style: 'currency',
             currency: currency,
-        }).format(amount);
+        }).format(amount || 0);
     },
 
     formatDate: (dateString) => {
@@ -26,23 +26,31 @@ const utils = {
         return `<span class="badge ${className}">${status}</span>`;
     },
 
-    showLoader: () => {
-        document.getElementById('content-area').innerHTML = `
-            <div class="loader-container">
-                <div class="loader"></div>
-            </div>
-        `;
+    showLoader: (containerId = 'content-area') => {
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.innerHTML = `
+                <div class="loader-container">
+                    <div class="loader"></div>
+                </div>
+            `;
+        }
     },
 
     renderTable: (headers, rows, emptyMessage = 'No records found') => {
         if (!rows || rows.length === 0) {
-            return `<div class="glass-panel" style="text-align: center; padding: 3rem;">
-                <p style="color: var(--text-muted);">${emptyMessage}</p>
-            </div>`;
+            return `
+                <div class="glass-panel" style="text-align: center; padding: 4rem;">
+                    <div style="margin-bottom: 1rem; opacity: 0.5;">
+                        <i data-lucide="folder-open" style="width: 48px; height: 48px;"></i>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 1.1rem;">${emptyMessage}</p>
+                </div>
+            `;
         }
 
         return `
-            <div class="glass-panel">
+            <div class="glass-panel" style="padding: 0; overflow: hidden;">
                 <div class="data-table-container">
                     <table>
                         <thead>
@@ -51,8 +59,8 @@ const utils = {
                             </tr>
                         </thead>
                         <tbody>
-                            ${rows.map(row => `
-                                <tr>
+                            ${rows.map((row, idx) => `
+                                <tr style="animation: slideIn 0.3s ease-out ${idx * 0.05}s both;">
                                     ${row.map(cell => `<td>${cell}</td>`).join('')}
                                 </tr>
                             `).join('')}
@@ -61,27 +69,52 @@ const utils = {
                 </div>
             </div>
         `;
-    },
+    }
+};
 
+export const UI = {
     openModal: (title, bodyHtml) => {
         const overlay = document.getElementById('modal-overlay');
         const titleEl = document.getElementById('modal-title');
         const bodyEl = document.getElementById('modal-body');
         
-        titleEl.innerText = title;
-        bodyEl.innerHTML = bodyHtml;
-        overlay.classList.add('active');
-        lucide.createIcons();
+        if (titleEl && bodyEl && overlay) {
+            titleEl.innerText = title;
+            bodyEl.innerHTML = bodyHtml;
+            overlay.classList.add('active');
+            if (window.lucide) window.lucide.createIcons();
+        }
     },
 
     closeModal: () => {
         const overlay = document.getElementById('modal-overlay');
-        overlay.classList.remove('active');
-    }
-};
+        if (overlay) overlay.classList.remove('active');
+    },
 
-// Global UI shorthand
-const UI = {
-    openModal: utils.openModal,
-    closeModal: utils.closeModal
+    showToast: (message, type = 'info') => {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        
+        let icon = 'info';
+        if (type === 'success') icon = 'check-circle';
+        if (type === 'error') icon = 'alert-circle';
+        if (type === 'warning') icon = 'alert-triangle';
+
+        toast.innerHTML = `
+            <i data-lucide="${icon}"></i>
+            <span>${message}</span>
+        `;
+        
+        container.appendChild(toast);
+        if (window.lucide) window.lucide.createIcons();
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(20px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
 };

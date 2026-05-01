@@ -1,4 +1,7 @@
-const FATTestsView = {
+import { api } from '../api.js';
+import { utils } from '../utils.js';
+
+export const FATTestsView = {
     render: async () => {
         utils.showLoader();
         try {
@@ -6,12 +9,7 @@ const FATTestsView = {
             try {
                 response = await api.getFATTests();
             } catch (e) {
-                response = {
-                    items: [
-                        { id: '1', test_number: 'FAT-2024-01', po_number: 'PO-2024-001', scheduled_date: '2024-04-25', status: 'PASSED', inspector_name: 'John Doe' },
-                        { id: '2', test_number: 'FAT-2024-02', po_number: 'PO-2024-002', scheduled_date: '2024-05-05', status: 'SCHEDULED', inspector_name: 'Jane Smith' },
-                    ]
-                };
+                response = { items: [] };
             }
 
             const headers = ['Test #', 'PO #', 'Date', 'Inspector', 'Status', 'Actions'];
@@ -35,7 +33,7 @@ const FATTestsView = {
             `;
             
             document.getElementById('content-area').innerHTML = html;
-            lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
         } catch (error) {
             document.getElementById('content-area').innerHTML = `<p class="error">Error: ${error.message}</p>`;
         }

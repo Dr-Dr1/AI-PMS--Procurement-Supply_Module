@@ -1,4 +1,7 @@
-const DeliveriesView = {
+import { api } from '../api.js';
+import { utils } from '../utils.js';
+
+export const DeliveriesView = {
     render: async () => {
         utils.showLoader();
         try {
@@ -6,12 +9,7 @@ const DeliveriesView = {
             try {
                 response = await api.getDeliveries();
             } catch (e) {
-                response = {
-                    items: [
-                        { id: '1', delivery_number: 'DEL-9901', po_number: 'PO-2024-001', expected_arrival: '2024-05-10', status: 'IN_TRANSIT' },
-                        { id: '2', delivery_number: 'DEL-9902', po_number: 'PO-2024-001', expected_arrival: '2024-05-15', status: 'SCHEDULED' },
-                    ]
-                };
+                response = { items: [] };
             }
 
             const headers = ['Delivery #', 'PO #', 'Expected Arrival', 'Status', 'Actions'];
@@ -34,7 +32,7 @@ const DeliveriesView = {
             `;
             
             document.getElementById('content-area').innerHTML = html;
-            lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
         } catch (error) {
             document.getElementById('content-area').innerHTML = `<p class="error">Error: ${error.message}</p>`;
         }

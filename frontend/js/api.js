@@ -1,7 +1,7 @@
 const API_BASE_URL = '/api/v1';
 
-const api = {
-    async fetch(endpoint, options = {}) {
+class ApiService {
+    async request(endpoint, options = {}) {
         const url = `${API_BASE_URL}${endpoint}`;
         const defaultOptions = {
             headers: {
@@ -17,56 +17,54 @@ const api = {
             }
             return await response.json();
         } catch (error) {
-            console.error('API call failed:', error);
+            console.error(`API Error [${endpoint}]:`, error);
             throw error;
         }
-    },
+    }
 
     // Dashboard
-    getDashboardSummary: () => api.fetch('/procurement/dashboard/summary'),
+    getDashboardSummary() {
+        return this.request('/procurement/dashboard/summary');
+    }
 
     // Vendors
-    getVendors: (params = {}) => {
+    getVendors(params = {}) {
         const query = new URLSearchParams(params).toString();
-        return api.fetch(`/procurement/vendors?${query}`);
-    },
-    getVendor: (id) => api.fetch(`/procurement/vendors/${id}`),
-    createVendor: (data) => api.fetch('/procurement/vendors', { method: 'POST', body: JSON.stringify(data) }),
-    updateVendor: (id, data) => api.fetch(`/procurement/vendors/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+        return this.request(`/procurement/vendors?${query}`);
+    }
+    createVendor(data) {
+        return this.request('/procurement/vendors', { method: 'POST', body: JSON.stringify(data) });
+    }
 
     // Materials
-    getMaterials: (params = {}) => {
+    getMaterials(params = {}) {
         const query = new URLSearchParams(params).toString();
-        return api.fetch(`/procurement/materials?${query}`);
-    },
-    getMaterial: (id) => api.fetch(`/procurement/materials/${id}`),
-    createMaterial: (data) => api.fetch('/procurement/materials', { method: 'POST', body: JSON.stringify(data) }),
+        return this.request(`/procurement/materials?${query}`);
+    }
+    createMaterial(data) {
+        return this.request('/procurement/materials', { method: 'POST', body: JSON.stringify(data) });
+    }
 
     // Purchase Orders
-    getPurchaseOrders: (params = {}) => {
+    getPurchaseOrders(params = {}) {
         const query = new URLSearchParams(params).toString();
-        return api.fetch(`/procurement/purchase-orders?${query}`);
-    },
-    getPurchaseOrder: (id) => api.fetch(`/procurement/purchase-orders/${id}`),
-    createPurchaseOrder: (data) => api.fetch('/procurement/purchase-orders', { method: 'POST', body: JSON.stringify(data) }),
-    updatePOStatus: (id, status, remarks) => api.fetch(`/procurement/purchase-orders/${id}/status`, { 
-        method: 'PATCH', 
-        body: JSON.stringify({ status, remarks }) 
-    }),
+        return this.request(`/procurement/purchase-orders?${query}`);
+    }
+    createPurchaseOrder(data) {
+        return this.request('/procurement/purchase-orders', { method: 'POST', body: JSON.stringify(data) });
+    }
 
     // Deliveries
-    getDeliveries: (params = {}) => {
+    getDeliveries(params = {}) {
         const query = new URLSearchParams(params).toString();
-        return api.fetch(`/procurement/deliveries?${query}`);
-    },
-    getDelivery: (id) => api.fetch(`/procurement/deliveries/${id}`),
-    createDelivery: (data) => api.fetch('/procurement/deliveries', { method: 'POST', body: JSON.stringify(data) }),
+        return this.request(`/procurement/deliveries?${query}`);
+    }
 
     // FAT Tests
-    getFATTests: (params = {}) => {
+    getFATTests(params = {}) {
         const query = new URLSearchParams(params).toString();
-        return api.fetch(`/procurement/fat-tests?${query}`);
-    },
-    getFATTest: (id) => api.fetch(`/procurement/fat-tests/${id}`),
-    scheduleFAT: (data) => api.fetch('/procurement/fat-tests', { method: 'POST', body: JSON.stringify(data) }),
-};
+        return this.request(`/procurement/fat-tests?${query}`);
+    }
+}
+
+export const api = new ApiService();

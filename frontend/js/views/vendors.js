@@ -1,4 +1,7 @@
-const VendorsView = {
+import { api } from '../api.js';
+import { utils, UI } from '../utils.js';
+
+export const VendorsView = {
     render: async () => {
         utils.showLoader();
         try {
@@ -6,13 +9,7 @@ const VendorsView = {
             try {
                 response = await api.getVendors();
             } catch (e) {
-                // Mock data for demonstration
-                response = {
-                    items: [
-                        { id: '1', name: 'Global Steel Ltd', code: 'V001', contact_email: 'sales@globalsteel.com', vendor_status: 'ACTIVE', vendor_tier: 'GOLD' },
-                        { id: '2', name: 'Tech Logistics', code: 'V002', contact_email: 'info@techlog.com', vendor_status: 'ACTIVE', vendor_tier: 'SILVER' },
-                    ]
-                };
+                response = { items: [] };
             }
 
             const headers = ['Code', 'Name', 'Email', 'Tier', 'Status', 'Actions'];
@@ -22,13 +19,13 @@ const VendorsView = {
                 v.contact_email || 'N/A',
                 `<span class="badge" style="background: #eef2ff; color: #4338ca;">${v.vendor_tier || 'N/A'}</span>`,
                 utils.getStatusBadge(v.vendor_status),
-                `<button class="btn btn-secondary btn-sm" onclick="alert('View details for ${v.id}')">View</button>`
+                `<button class="btn btn-secondary btn-sm" data-id="${v.id}">View</button>`
             ]);
 
             const html = `
                 <div class="panel-header" style="margin-bottom: var(--space-md);">
                     <h2 class="panel-title">Vendor Directory</h2>
-                    <button class="btn btn-primary" onclick="VendorsView.showCreateModal()">
+                    <button class="btn btn-primary" id="add-vendor-btn">
                         <i data-lucide="user-plus"></i> Add Vendor
                     </button>
                 </div>
@@ -36,7 +33,10 @@ const VendorsView = {
             `;
             
             document.getElementById('content-area').innerHTML = html;
-            lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
+
+            // Event Listeners
+            document.getElementById('add-vendor-btn').onclick = () => VendorsView.showCreateModal();
         } catch (error) {
             document.getElementById('content-area').innerHTML = `<p class="error">Error: ${error.message}</p>`;
         }
@@ -59,7 +59,7 @@ const VendorsView = {
                         <select name="vendor_tier">
                             <option value="BRONZE">Bronze</option>
                             <option value="SILVER">Silver</option>
-                            <option value="GOLD">Gold</option>
+                            <option value="GOLD" selected>Gold</option>
                             <option value="PLATINUM">Platinum</option>
                         </select>
                     </div>
@@ -73,12 +73,14 @@ const VendorsView = {
                     <textarea name="address" rows="2"></textarea>
                 </div>
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="UI.closeModal()">Cancel</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-modal-btn">Cancel</button>
                     <button type="submit" class="btn btn-primary">Create Vendor</button>
                 </div>
             </form>
         `;
         UI.openModal('Register New Vendor', formHtml);
+        
+        document.getElementById('cancel-modal-btn').onclick = () => UI.closeModal();
         
         document.getElementById('create-vendor-form').onsubmit = async (e) => {
             e.preventDefault();
@@ -87,10 +89,11 @@ const VendorsView = {
             
             try {
                 await api.createVendor(data);
+                UI.showToast('Vendor registered successfully!', 'success');
                 UI.closeModal();
-                VendorsView.render(); // Refresh list
+                VendorsView.render();
             } catch (err) {
-                alert('Failed to create vendor: ' + err.message);
+                UI.showToast('Failed to register vendor: ' + err.message, 'error');
             }
         };
     }

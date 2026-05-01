@@ -29,29 +29,29 @@
             </div>
             
             <nav class="sidebar-nav">
-                <a href="#dashboard" class="nav-link active" id="nav-dashboard">
+                <a href="#dashboard" class="nav-link active" data-link="dashboard">
                     <i data-lucide="layout-dashboard"></i>
                     <span>Dashboard</span>
                 </a>
                 <div class="nav-section">MANAGEMENT</div>
-                <a href="#vendors" class="nav-link" id="nav-vendors">
+                <a href="#vendors" class="nav-link" data-link="vendors">
                     <i data-lucide="users"></i>
                     <span>Vendors</span>
                 </a>
-                <a href="#materials" class="nav-link" id="nav-materials">
+                <a href="#materials" class="nav-link" data-link="materials">
                     <i data-lucide="package"></i>
                     <span>Materials</span>
                 </a>
                 <div class="nav-section">OPERATIONS</div>
-                <a href="#purchase-orders" class="nav-link" id="nav-purchase-orders">
+                <a href="#purchase-orders" class="nav-link" data-link="purchase-orders">
                     <i data-lucide="shopping-cart"></i>
                     <span>Purchase Orders</span>
                 </a>
-                <a href="#deliveries" class="nav-link" id="nav-deliveries">
+                <a href="#deliveries" class="nav-link" data-link="deliveries">
                     <i data-lucide="truck"></i>
                     <span>Deliveries</span>
                 </a>
-                <a href="#fat-tests" class="nav-link" id="nav-fat-tests">
+                <a href="#fat-tests" class="nav-link" data-link="fat-tests">
                     <i data-lucide="clipboard-check"></i>
                     <span>FAT Tests</span>
                 </a>
@@ -90,7 +90,6 @@
             </header>
             
             <div id="content-area" class="content-area">
-                <!-- Content will be injected here by JS -->
                 <div class="loader-container">
                     <div class="loader"></div>
                 </div>
@@ -103,7 +102,7 @@
         <div class="modal">
             <div class="modal-header">
                 <h3 id="modal-title">Modal Title</h3>
-                <button class="icon-button" onclick="UI.closeModal()">
+                <button class="icon-button" id="close-modal-btn">
                     <i data-lucide="x"></i>
                 </button>
             </div>
@@ -113,15 +112,10 @@
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="js/api.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/views/dashboard.js"></script>
-    <script src="js/views/vendors.js"></script>
-    <script src="js/views/materials.js"></script>
-    <script src="js/views/purchase-orders.js"></script>
-    <script src="js/views/deliveries.js"></script>
-    <script src="js/views/fat-tests.js"></script>
-    <script src="js/app.js"></script>
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Scripts (ES Module) -->
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>

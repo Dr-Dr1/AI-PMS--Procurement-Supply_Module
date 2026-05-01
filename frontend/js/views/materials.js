@@ -1,4 +1,7 @@
-const MaterialsView = {
+import { api } from '../api.js';
+import { utils, UI } from '../utils.js';
+
+export const MaterialsView = {
     render: async () => {
         utils.showLoader();
         try {
@@ -6,12 +9,7 @@ const MaterialsView = {
             try {
                 response = await api.getMaterials();
             } catch (e) {
-                response = {
-                    items: [
-                        { id: '1', name: 'Cement Grade A', code: 'MAT-001', category: 'Construction', unit: 'Bag', is_active: true },
-                        { id: '2', name: 'Steel Rods 12mm', code: 'MAT-002', category: 'Metal', unit: 'Ton', is_active: true },
-                    ]
-                };
+                response = { items: [] };
             }
 
             const headers = ['Code', 'Name', 'Category', 'Unit', 'Status', 'Actions'];
@@ -27,15 +25,17 @@ const MaterialsView = {
             const html = `
                 <div class="panel-header" style="margin-bottom: var(--space-md);">
                     <h2 class="panel-title">Material Catalogue</h2>
-                    <button class="btn btn-primary" onclick="MaterialsView.showCreateModal()">
-                         <i data-lucide="package-plus"></i> Add Material
+                    <button class="btn btn-primary" id="add-material-btn">
+                        <i data-lucide="package-plus"></i> Add Material
                     </button>
                 </div>
                 ${utils.renderTable(headers, rows, 'Catalogue is empty.')}
             `;
             
             document.getElementById('content-area').innerHTML = html;
-            lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
+
+            document.getElementById('add-material-btn').onclick = () => MaterialsView.showCreateModal();
         } catch (error) {
             document.getElementById('content-area').innerHTML = `<p class="error">Error: ${error.message}</p>`;
         }
@@ -58,27 +58,19 @@ const MaterialsView = {
                         <input type="text" name="category" placeholder="e.g. Structural">
                     </div>
                 </div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Unit of Measure</label>
-                        <input type="text" name="unit" required placeholder="e.g. Ton, Bag, Meter">
-                    </div>
-                    <div class="form-group">
-                        <label>HSN Code</label>
-                        <input type="text" name="hsn_code" placeholder="Tax Category">
-                    </div>
-                </div>
                 <div class="form-group">
-                    <label>Description</label>
-                    <textarea name="description" rows="2"></textarea>
+                    <label>Unit of Measure</label>
+                    <input type="text" name="unit" required placeholder="e.g. Ton, Bag, Meter">
                 </div>
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="UI.closeModal()">Cancel</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-modal-btn">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Material</button>
                 </div>
             </form>
         `;
         UI.openModal('Add Material to Catalogue', formHtml);
+        
+        document.getElementById('cancel-modal-btn').onclick = () => UI.closeModal();
         
         document.getElementById('create-material-form').onsubmit = async (e) => {
             e.preventDefault();
@@ -87,10 +79,11 @@ const MaterialsView = {
             
             try {
                 await api.createMaterial(data);
+                UI.showToast('Material added to catalogue', 'success');
                 UI.closeModal();
                 MaterialsView.render();
             } catch (err) {
-                alert('Failed to save material: ' + err.message);
+                UI.showToast('Failed to save material: ' + err.message, 'error');
             }
         };
     }
