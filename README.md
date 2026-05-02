@@ -4,42 +4,26 @@ A premium, high-performance modular system for managing procurement lifecycles, 
 
 ---
 
-## 🚀 Quick Start (Docker)
-
-The easiest way to get the project running on **Linux or Windows** is using Docker.
-
-1. **Prerequisites**: [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
-2. **Launch**:
-   ```bash
-   docker-compose up -d --build
-   ```
-3. **Access**:
-   - **Frontend/API**: `http://localhost:8000`
-   - **API Docs**: `http://localhost:8000/docs`
-
----
-
-## 🛠️ Manual Setup
+## 🛠️ Getting Started (Recommended)
 
 ### 1. Prerequisites
 - Python 3.10+
 - PostgreSQL 15+
-- Node.js (Optional, for frontend development)
 
-### 2. Environment Configuration
+### 2. Installation
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+### 3. Environment Configuration
 Copy the template to create your environment file:
 ```bash
 cp .env.example .env
 ```
 > [!IMPORTANT]
 > A `.env` file is intentionally used for local development to manage sensitive database credentials and configuration. Ensure it is updated with your local PostgreSQL details.
-
-### 3. Installation
-```bash
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-```
 
 ### 4. Database Initialization
 ```bash
@@ -50,6 +34,21 @@ alembic upgrade head
 ```bash
 uvicorn app.main:app --reload
 ```
+
+---
+
+## 🐳 Docker Setup (Alternative / Troubleshooting)
+
+If you encounter any issues with local dependencies or database configuration, use Docker as a **second option** to run the project in a guaranteed environment.
+
+1. **Launch**:
+   ```bash
+   docker-compose up -d --build
+   ```
+2. **Access**:
+   - **Frontend/API**: `http://localhost:8000`
+   - **API Docs**: `http://localhost:8000/docs`
+
 
 ---
 
