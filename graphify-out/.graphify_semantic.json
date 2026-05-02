@@ -1,0 +1,130 @@
+{
+  "nodes": [
+    {
+      "id": "readme_procurement_module",
+      "label": "Procurement Module",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null
+    },
+    {
+      "id": "api_documentation_vendors",
+      "label": "Vendor Management API",
+      "file_type": "document",
+      "source_file": "docs/api_documentation.md",
+      "source_location": null
+    },
+    {
+      "id": "api_documentation_materials",
+      "label": "Material Catalogue API",
+      "file_type": "document",
+      "source_file": "docs/api_documentation.md",
+      "source_location": null
+    },
+    {
+      "id": "api_documentation_pos",
+      "label": "Purchase Orders API",
+      "file_type": "document",
+      "source_file": "docs/api_documentation.md",
+      "source_location": null
+    },
+    {
+      "id": "api_documentation_deliveries",
+      "label": "Deliveries API",
+      "file_type": "document",
+      "source_file": "docs/api_documentation.md",
+      "source_location": null
+    },
+    {
+      "id": "api_documentation_fat",
+      "label": "FAT Tests API",
+      "file_type": "document",
+      "source_file": "docs/api_documentation.md",
+      "source_location": null
+    },
+    {
+      "id": "phase2_indents",
+      "label": "Indents (Material Requisition)",
+      "file_type": "document",
+      "source_file": "docs/phase2.md",
+      "source_location": null
+    },
+    {
+      "id": "phase2_schedule_link",
+      "label": "Material Schedule Link",
+      "file_type": "document",
+      "source_file": "docs/phase2.md",
+      "source_location": null
+    },
+    {
+      "id": "phase2_implementation_plan",
+      "label": "Phase 2 Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/phase2.md",
+      "source_location": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "api_documentation_pos",
+      "target": "api_documentation_vendors",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/api_documentation.md"
+    },
+    {
+      "source": "api_documentation_pos",
+      "target": "api_documentation_materials",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/api_documentation.md"
+    },
+    {
+      "source": "api_documentation_deliveries",
+      "target": "api_documentation_pos",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/api_documentation.md"
+    },
+    {
+      "source": "api_documentation_fat",
+      "target": "api_documentation_pos",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/api_documentation.md"
+    },
+    {
+      "source": "phase2_indents",
+      "target": "api_documentation_pos",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "docs/phase2.md"
+    },
+    {
+      "source": "phase2_schedule_link",
+      "target": "api_documentation_materials",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/phase2.md"
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "procurement_lifecycle",
+      "label": "Procurement Lifecycle",
+      "nodes": ["phase2_indents", "api_documentation_pos", "api_documentation_deliveries", "api_documentation_fat"],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/phase2.md"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}
