@@ -1,0 +1,10 @@
+.venv
+venv
+__pycache__
+.git
+.gitignore
+.dockerignore
+.env
+graphify-out
+*.db
+*.log

@@ -1,139 +1,105 @@
-# PMS Modular API - Procurement Supply Module
+# AI-PMS: Procurement & Supply Chain Module
 
-Production management system with modular architecture. FastAPI backend with async PostgreSQL, Alembic migrations.
+A premium, high-performance modular system for managing procurement lifecycles, supply chain logistics, and material scheduling. Built with a modern FastAPI backend and a responsive Vanilla JS frontend featuring glassmorphism aesthetics.
 
 ---
 
-## Setup Environment
+## 🚀 Quick Start (Docker)
 
-### Prerequisites
-- Python 3.9+
-- PostgreSQL 12+
-- pip
+The easiest way to get the project running on **Linux or Windows** is using Docker.
 
-### 1. Clone Repository
+1. **Prerequisites**: [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
+2. **Launch**:
+   ```bash
+   docker-compose up -d --build
+   ```
+3. **Access**:
+   - **Frontend/API**: `http://localhost:8000`
+   - **API Docs**: `http://localhost:8000/docs`
+
+---
+
+## 🛠️ Manual Setup
+
+### 1. Prerequisites
+- Python 3.10+
+- PostgreSQL 15+
+- Node.js (Optional, for frontend development)
+
+### 2. Environment Configuration
+Copy the template to create your environment file:
 ```bash
-git clone <repo-url>
-cd AI-PMS--Procurement-Supply_Module
+cp .env.example .env
 ```
+> [!IMPORTANT]
+> A `.env` file is intentionally used for local development to manage sensitive database credentials and configuration. Ensure it is updated with your local PostgreSQL details.
 
-### 2. Create Virtual Environment
+### 3. Installation
 ```bash
-python -m venv venv
-
-# Activate (Windows)
-venv\Scripts\activate
-
-# Activate (Linux/Mac)
-source venv/bin/activate
-```
-
-### 3. Install Dependencies
-```bash
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. Configure Environment Variables
-Create `.env` file in project root:
-```env
-DATABASE_URL=postgresql+asyncpg://postgres:password@localhost/procurement_module
-```
-
-**Required variables:**
-- `DATABASE_URL` - PostgreSQL async connection string. Format: `postgresql+asyncpg://user:password@host:port/dbname`
-
-### 5. Create Database
-```bash
-createdb procurement_module
-```
-
-Or via PostgreSQL:
-```sql
-CREATE DATABASE procurement_module;
-```
-
-### 6. Run Migrations
+### 4. Database Initialization
 ```bash
 alembic upgrade head
 ```
 
-### 7. Start Server
+### 5. Run Development Server
 ```bash
 uvicorn app.main:app --reload
 ```
 
-Server runs at: `http://localhost:8000`
+---
+
+## 🧠 Knowledge Graph (Graphify)
+
+This project uses **Graphify** to maintain a persistent knowledge graph of the codebase architecture, relationships, and design rationale.
+
+- **Interactive Graph**: Open `graphify-out/graph.html` in your browser to explore the system architecture visually.
+- **Architectural Report**: See `graphify-out/GRAPH_REPORT.md` for a summary of core components and "God Nodes".
+- **Query the Graph**: If using an AI assistant with the Graphify skill, you can ask deep architectural questions like:
+  ```
+  /graphify query "How does the Indent approval flow connect to Purchase Orders?"
+  ```
 
 ---
 
-## API Endpoints
+## 📂 Project Structure
 
-### Procurement Orders
-- **POST** `/api/v1/procurement/orders` - Create procurement order
-- **GET** `/api/v1/procurement/orders` - List all procurement orders
-
----
-
-## Project Structure
-
-```
-app/
-├── core/
-│   ├── database.py      # Database setup (SQLAlchemy async)
-│   └── migrations.py    # Alembic migration runner
-├── models/
-│   └── models.py        # SQLAlchemy ORM models
-├── modules/
-│   └── procurement/
-│       ├── dtos/        # Data transfer objects (Pydantic schemas)
-│       ├── repositories/# Database access layer
-│       ├── routers/     # FastAPI routes
-│       └── services/    # Business logic
-└── main.py              # FastAPI app entry point
-```
-
----
-
-## Development
-
-**Run tests:**
 ```bash
-pytest
-```
-
-**Format code:**
-```bash
-black app/
-```
-
-**Lint:**
-```bash
-flake8 app/
+├── app/                  # FastAPI Backend
+│   ├── core/             # Database config, Migrations, Enums
+│   ├── models/           # SQLAlchemy ORM Models
+│   └── modules/          # Domain-driven Modules (Procurement, etc.)
+│       └── procurement/  # Services, Repositories, Routers, DTOs
+├── frontend/             # Vanilla JS Frontend (SPA)
+│   ├── css/              # Design System & Styling
+│   ├── js/               # ES Modules (App, API, Views)
+│   └── index.html        # Main Entry Point
+├── docs/                 # API & Phase Documentation
+├── alembic/              # Database Migrations
+└── graphify-out/         # AI-generated Knowledge Graph
 ```
 
 ---
 
-## Environment Variables
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL async connection string | `postgresql+asyncpg://postgres:password@localhost/procurement_module` |
+## ✨ Features
+- **Modular ES6 Frontend**: No build tools required, pure high-performance JavaScript.
+- **Glassmorphism UI**: Premium design system with backdrop blurs and entrance animations.
+- **Automated Lifecycle**: Handles Indents → POs → FAT → Deliveries.
+- **Containerized**: Fully portable via Docker Compose.
+- **Knowledge-Aware**: Integrated Graphify support for better developer onboarding.
 
 ---
 
-## Database Migrations
+## 🤝 Development Guidelines
+- **ES Modules**: Always use `import/export` for frontend scripts.
+- **Migrations**: Use `alembic revision --autogenerate` for schema changes.
+- **Styling**: Stick to the CSS variables defined in `styles.css` to maintain theme consistency.
 
-**Create new migration:**
-```bash
-alembic revision --autogenerate -m "migration description"
-```
+---
 
-**Apply migrations:**
-```bash
-alembic upgrade head
-```
-
-**Rollback:**
-```bash
-alembic downgrade -1
-```
+## 📄 License
+Internal AI-PMS Project.
