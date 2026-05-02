@@ -65,6 +65,26 @@ class ApiService {
         const query = new URLSearchParams(params).toString();
         return this.request(`/procurement/fat-tests?${query}`);
     }
+
+    // Indents
+    getIndents(params = {}) {
+        const query = new URLSearchParams(params).toString();
+        return this.request(`/procurement/indents?${query}`);
+    }
+    createIndent(data) {
+        return this.request('/procurement/indents', { method: 'POST', body: JSON.stringify(data) });
+    }
+    convertIndentToPO(indentId, vendorId, poNumber) {
+        return this.request(`/procurement/indents/${indentId}/convert-to-po?vendor_id=${vendorId}&po_number=${poNumber}`, { method: 'POST' });
+    }
+
+    // Schedule Links
+    getScheduleLinks(activityId) {
+        return this.request(`/procurement/activities/${activityId}/material-links`);
+    }
+    createScheduleLink(data) {
+        return this.request('/procurement/schedule-links', { method: 'POST', body: JSON.stringify(data) });
+    }
 }
 
 export const api = new ApiService();

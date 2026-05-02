@@ -5,6 +5,8 @@ import { MaterialsView } from './views/materials.js';
 import { PurchaseOrdersView } from './views/purchase-orders.js';
 import { DeliveriesView } from './views/deliveries.js';
 import { FATTestsView } from './views/fat-tests.js';
+import { IndentsView } from './views/indents.js';
+import { ScheduleLinksView } from './views/schedule-links.js';
 
 const App = {
     views: {
@@ -13,7 +15,9 @@ const App = {
         materials: MaterialsView,
         'purchase-orders': PurchaseOrdersView,
         deliveries: DeliveriesView,
-        'fat-tests': FATTestsView
+        'fat-tests': FATTestsView,
+        indents: IndentsView,
+        'schedule-links': ScheduleLinksView
     },
 
     init: () => {

@@ -18,6 +18,7 @@ export const MaterialsView = {
                 m.name,
                 m.category,
                 m.unit,
+                m.is_equipment ? `<span class="badge" style="background: #fef3c7; color: #92400e;">EQUIP (${m.acquisition_strategy})</span>` : 'MAT',
                 utils.getStatusBadge(m.is_active ? 'ACTIVE' : 'INACTIVE'),
                 `<button class="btn btn-secondary btn-sm">Edit</button>`
             ]);
@@ -58,9 +59,26 @@ export const MaterialsView = {
                         <input type="text" name="category" placeholder="e.g. Structural">
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Unit of Measure</label>
-                    <input type="text" name="unit" required placeholder="e.g. Ton, Bag, Meter">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Unit of Measure</label>
+                        <input type="text" name="unit" required placeholder="e.g. Ton, Bag, Meter">
+                    </div>
+                    <div class="form-group">
+                        <label>Is Equipment?</label>
+                        <select name="is_equipment">
+                            <option value="false">No (Material)</option>
+                            <option value="true">Yes (Machinery/Plant)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" id="strategy-group" style="display:none;">
+                    <label>Acquisition Strategy</label>
+                    <select name="acquisition_strategy">
+                        <option value="NOT_APPLICABLE">N/A</option>
+                        <option value="PURCHASED">Purchased (Capex)</option>
+                        <option value="LEASED">Leased (Opex/Rental)</option>
+                    </select>
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" id="cancel-modal-btn">Cancel</button>
@@ -72,10 +90,17 @@ export const MaterialsView = {
         
         document.getElementById('cancel-modal-btn').onclick = () => UI.closeModal();
         
+        const isEquipSelect = document.querySelector('select[name="is_equipment"]');
+        const strategyGroup = document.getElementById('strategy-group');
+        isEquipSelect.onchange = (e) => {
+            strategyGroup.style.display = e.target.value === 'true' ? 'block' : 'none';
+        };
+
         document.getElementById('create-material-form').onsubmit = async (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
+            data.is_equipment = data.is_equipment === 'true';
             
             try {
                 await api.createMaterial(data);

@@ -235,6 +235,24 @@ class ApprovalStatus(str, enum.Enum):
     ESCALATED = "ESCALATED"
 
 
+class IndentStatus(str, enum.Enum):
+    """Material Requisition lifecycle states per Step 1-4 of procurement flow."""
+    DRAFT = "DRAFT"
+    SUBMITTED = "SUBMITTED"
+    TECH_REVIEW = "TECH_REVIEW"
+    COMMERCIAL_REVIEW = "COMMERCIAL_REVIEW"
+    APPROVED = "APPROVED"
+    PO_ISSUED = "PO_ISSUED"
+    REJECTED = "REJECTED"
+
+
+class EquipmentStrategy(str, enum.Enum):
+    """Purchased vs Leased strategy for machinery/equipment."""
+    PURCHASED = "PURCHASED"
+    LEASED = "LEASED"
+    NOT_APPLICABLE = "NOT_APPLICABLE"
+
+
 class MaterialCategory(str, enum.Enum):
     STRUCTURAL = "STRUCTURAL"
     ELECTRICAL = "ELECTRICAL"
@@ -244,6 +262,7 @@ class MaterialCategory(str, enum.Enum):
     TRACK = "TRACK"
     ROLLING_STOCK = "ROLLING_STOCK"
     CIVIL = "CIVIL"
+    EQUIPMENT = "EQUIPMENT"
     OTHER = "OTHER"
 
 

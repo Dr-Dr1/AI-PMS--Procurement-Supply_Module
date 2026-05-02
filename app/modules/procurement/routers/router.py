@@ -36,6 +36,10 @@ from app.modules.procurement.dtos.dtos import (
     FATTestCreate, FATTestUpdate, FATTestResponse,
     # Vendor Score
     VendorScoreCreate, VendorScoreResponse,
+    # Indent
+    IndentCreate, IndentUpdate, IndentResponse,
+    # Material Schedule Link
+    MaterialScheduleLinkCreate, MaterialScheduleLinkResponse,
     # Dashboard
     ProcurementDashboard,
     # Pagination
@@ -46,6 +50,7 @@ from app.modules.procurement.dtos.dtos import (
 from app.modules.procurement.services.service import (
     VendorService, MaterialService, PurchaseOrderService,
     DeliveryService, FATTestService, VendorScoreService,
+    IndentService, MaterialScheduleLinkService,
     DashboardService, ProcurementService,
 )
 
@@ -301,6 +306,22 @@ async def update_po_status(
     return await PurchaseOrderService(db).update_status(po_id, data)
 
 
+@router.post(
+    "/indents/{indent_id}/convert-to-po",
+    response_model=PurchaseOrderResponse,
+    status_code=201,
+    summary="Convert Indent to PO",
+    description="Step 6: Convert an APPROVED indent into a DRAFT Purchase Order. Requires selecting a vendor and providing a PO number.",
+)
+async def convert_indent_to_po(
+    indent_id: uuid.UUID,
+    vendor_id: uuid.UUID = Query(...),
+    po_number: str = Query(...),
+    db: AsyncSession = Depends(get_db),
+):
+    return await PurchaseOrderService(db).create_from_indent(indent_id, vendor_id, po_number)
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 #  DELIVERIES
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -451,6 +472,95 @@ async def update_fat_status(
     db: AsyncSession = Depends(get_db),
 ):
     return await FATTestService(db).update_status(fat_id, data)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  INDENTS (Material Requisition)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@router.post(
+    "/indents",
+    response_model=IndentResponse,
+    status_code=201,
+    summary="Create Indent",
+    description="Create a new material requisition (Step 1).",
+)
+async def create_indent(
+    data: IndentCreate, db: AsyncSession = Depends(get_db)
+):
+    return await IndentService(db).create_indent(data)
+
+
+@router.get(
+    "/indents",
+    response_model=PaginatedResponse,
+    summary="List Indents",
+    description="Paginated indent listing with status filter.",
+)
+async def list_indents(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    status: Optional[str] = Query(None, description="Filter by IndentStatus"),
+    db: AsyncSession = Depends(get_db),
+):
+    return await IndentService(db).list_indents(
+        page=page, page_size=page_size, status_filter=status
+    )
+
+
+@router.get(
+    "/indents/{indent_id}",
+    response_model=IndentResponse,
+    summary="Get Indent",
+    description="Retrieve a single indent with items.",
+)
+async def get_indent(
+    indent_id: uuid.UUID, db: AsyncSession = Depends(get_db)
+):
+    return await IndentService(db).get_indent(indent_id)
+
+
+@router.patch(
+    "/indents/{indent_id}/status",
+    response_model=IndentResponse,
+    summary="Update Indent Status",
+    description="Transition indent status (Step 2-4 approval flow).",
+)
+async def update_indent_status(
+    indent_id: uuid.UUID,
+    data: StatusUpdate,
+    db: AsyncSession = Depends(get_db),
+):
+    return await IndentService(db).update_status(indent_id, data)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  MATERIAL SCHEDULE LINKS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@router.post(
+    "/schedule-links",
+    response_model=MaterialScheduleLinkResponse,
+    status_code=201,
+    summary="Link Material to Schedule",
+    description="Bridge an activity's material need to the procurement timeline (Expert A09).",
+)
+async def create_schedule_link(
+    data: MaterialScheduleLinkCreate, db: AsyncSession = Depends(get_db)
+):
+    return await MaterialScheduleLinkService(db).create_link(data)
+
+
+@router.get(
+    "/activities/{activity_id}/material-links",
+    response_model=list[MaterialScheduleLinkResponse],
+    summary="Get Material Links for Activity",
+    description="Retrieve all materials linked to a specific schedule activity.",
+)
+async def get_activity_material_links(
+    activity_id: uuid.UUID, db: AsyncSession = Depends(get_db)
+):
+    return await MaterialScheduleLinkService(db).get_links_for_activity(activity_id)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

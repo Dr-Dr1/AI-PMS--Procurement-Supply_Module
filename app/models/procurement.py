@@ -19,6 +19,7 @@ from app.core.database import Base
 from app.core.enums import (
     POStatus, VendorStatus, VendorTier, DeliveryStatus,
     FATStatus, ApprovalStatus, MaterialCategory, CurrencyCode,
+    IndentStatus, EquipmentStrategy,
 )
 
 
@@ -92,6 +93,11 @@ class Material(Base):
     unit: Mapped[str] = mapped_column(String(30), nullable=False)  # e.g. "MT", "NOS", "RM"
     hsn_code: Mapped[str | None] = mapped_column(String(20))
     specifications: Mapped[dict | None] = mapped_column(JSON)
+    is_equipment: Mapped[bool] = mapped_column(Boolean, default=False)
+    acquisition_strategy: Mapped[str] = mapped_column(
+        SAEnum(EquipmentStrategy, name="equipment_strategy_enum", create_constraint=True),
+        nullable=False, default=EquipmentStrategy.NOT_APPLICABLE,
+    )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=datetime.utcnow
@@ -137,6 +143,7 @@ class PurchaseOrder(Base):
         nullable=False, default=CurrencyCode.INR,
     )
     delivery_address: Mapped[str | None] = mapped_column(Text)
+    indent_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("indents.id"))
     expected_delivery_date: Mapped[date | None] = mapped_column(Date)
     actual_delivery_date: Mapped[date | None] = mapped_column(Date)
     terms_and_conditions: Mapped[str | None] = mapped_column(Text)
@@ -334,3 +341,99 @@ class VendorScoreHistory(Base):
 
     # Relationships
     vendor: Mapped["Vendor"] = relationship(back_populates="score_history")
+
+
+# ─── Indent (Material Requisition) ─────────────────────────────────────────────
+
+class Indent(Base):
+    """
+    Material Requisition / Indent (Step 1-4).
+    Bridges site need to purchase action.
+    """
+    __tablename__ = "indents"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    indent_number: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+    status: Mapped[str] = mapped_column(
+        SAEnum(IndentStatus, name="indent_status_enum", create_constraint=True),
+        nullable=False, default=IndentStatus.DRAFT,
+    )
+    requested_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("persons.id"), nullable=False)
+    need_date: Mapped[date] = mapped_column(Date, nullable=False)
+    boq_reference: Mapped[str | None] = mapped_column(String(100))
+    project_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("projects.id"))
+    remarks: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=datetime.utcnow
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    # Relationships
+    items: Mapped[list["IndentLineItem"]] = relationship(
+        back_populates="indent", lazy="selectin", cascade="all, delete-orphan"
+    )
+    purchase_orders: Mapped[list["PurchaseOrder"]] = relationship(lazy="selectin")
+
+
+class IndentLineItem(Base):
+    """Items requested within an indent."""
+    __tablename__ = "indent_line_items"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    indent_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("indents.id"), nullable=False
+    )
+    material_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("materials.id"), nullable=False
+    )
+    quantity: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    unit: Mapped[str] = mapped_column(String(30), nullable=False)
+    estimated_cost: Mapped[Decimal | None] = mapped_column(Numeric(15, 2))
+
+    # Relationships
+    indent: Mapped["Indent"] = relationship(back_populates="items")
+    material: Mapped["Material"] = relationship(lazy="selectin")
+
+
+# ─── Material Schedule Link ────────────────────────────────────────────────────
+
+class MaterialScheduleLink(Base):
+    """
+    Expert A09: High Value entity bridging Schedule (Activity) and Procurement (PO/Material).
+    PO.expected_delivery_date vs Activity.planned_start.
+    """
+    __tablename__ = "material_schedule_links"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    material_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("materials.id"), nullable=False
+    )
+    activity_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("activities.id"), nullable=False
+    )
+    po_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("purchase_orders.id")
+    )
+    required_quantity: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    need_date: Mapped[date] = mapped_column(Date, nullable=False)
+    
+    # AI-derived status: ON_TRACK, LATE, AT_RISK
+    status_flag: Mapped[str | None] = mapped_column(String(20))
+    gap_days: Mapped[int | None] = mapped_column(Integer)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=datetime.utcnow
+    )
+
+    # Relationships
+    material: Mapped["Material"] = relationship(lazy="selectin")
+    activity: Mapped["Activity"] = relationship(lazy="selectin")
+    purchase_order: Mapped["PurchaseOrder"] = relationship(lazy="selectin")

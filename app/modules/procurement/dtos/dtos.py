@@ -83,6 +83,8 @@ class MaterialCreate(BaseModel):
     unit: str = Field(..., max_length=30, examples=["MT"])
     hsn_code: Optional[str] = Field(None, max_length=20)
     specifications: Optional[dict] = None
+    is_equipment: bool = False
+    acquisition_strategy: str = "NOT_APPLICABLE"
 
 
 class MaterialUpdate(BaseModel):
@@ -92,6 +94,8 @@ class MaterialUpdate(BaseModel):
     unit: Optional[str] = Field(None, max_length=30)
     hsn_code: Optional[str] = Field(None, max_length=20)
     specifications: Optional[dict] = None
+    is_equipment: Optional[bool] = None
+    acquisition_strategy: Optional[str] = None
     is_active: Optional[bool] = None
 
 
@@ -106,6 +110,8 @@ class MaterialResponse(BaseModel):
     unit: str
     hsn_code: Optional[str] = None
     specifications: Optional[dict] = None
+    is_equipment: bool
+    acquisition_strategy: str
     is_active: bool
     created_at: datetime
 
@@ -149,6 +155,7 @@ class PurchaseOrderCreate(BaseModel):
     currency: str = Field(default="INR", examples=["INR"])
     delivery_address: Optional[str] = None
     expected_delivery_date: Optional[date] = None
+    indent_id: Optional[uuid.UUID] = None
     terms_and_conditions: Optional[str] = None
     remarks: Optional[str] = None
     line_items: list[POLineItemCreate] = Field(default_factory=list)
@@ -186,6 +193,7 @@ class PurchaseOrderResponse(BaseModel):
     actual_delivery_date: Optional[date] = None
     terms_and_conditions: Optional[str] = None
     remarks: Optional[str] = None
+    indent_id: Optional[uuid.UUID] = None
     created_by: Optional[uuid.UUID] = None
     approved_by: Optional[uuid.UUID] = None
     approved_at: Optional[datetime] = None
@@ -344,6 +352,86 @@ class VendorScoreResponse(BaseModel):
     overall_score: Decimal
     remarks: Optional[str] = None
     scored_by: Optional[uuid.UUID] = None
+    created_at: datetime
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Indent (Material Requisition)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class IndentLineItemCreate(BaseModel):
+    material_id: uuid.UUID
+    quantity: Decimal = Field(..., gt=0)
+    unit: str = Field(..., max_length=30)
+    estimated_cost: Optional[Decimal] = None
+
+
+class IndentLineItemResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    material_id: uuid.UUID
+    quantity: Decimal
+    unit: str
+    estimated_cost: Optional[Decimal] = None
+
+
+class IndentCreate(BaseModel):
+    indent_number: str = Field(..., max_length=50, examples=["IND-2026-0001"])
+    requested_by: uuid.UUID
+    need_date: date
+    project_id: Optional[uuid.UUID] = None
+    boq_reference: Optional[str] = Field(None, max_length=100)
+    remarks: Optional[str] = None
+    items: list[IndentLineItemCreate] = Field(default_factory=list)
+
+
+class IndentUpdate(BaseModel):
+    status: Optional[str] = None
+    need_date: Optional[date] = None
+    boq_reference: Optional[str] = None
+    remarks: Optional[str] = None
+
+
+class IndentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    indent_number: str
+    status: str
+    requested_by: uuid.UUID
+    need_date: date
+    boq_reference: Optional[str] = None
+    project_id: Optional[uuid.UUID] = None
+    remarks: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+    items: list[IndentLineItemResponse] = []
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Material Schedule Link
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class MaterialScheduleLinkCreate(BaseModel):
+    material_id: uuid.UUID
+    activity_id: uuid.UUID
+    po_id: Optional[uuid.UUID] = None
+    required_quantity: Decimal = Field(..., gt=0)
+    need_date: date
+
+
+class MaterialScheduleLinkResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    material_id: uuid.UUID
+    activity_id: uuid.UUID
+    po_id: Optional[uuid.UUID] = None
+    required_quantity: Decimal
+    need_date: date
+    status_flag: Optional[str] = None
+    gap_days: Optional[int] = None
     created_at: datetime
 
 

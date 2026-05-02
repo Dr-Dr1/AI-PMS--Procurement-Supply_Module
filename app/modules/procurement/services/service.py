@@ -18,6 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.modules.procurement.repositories.repository import (
     VendorRepository, MaterialRepository, PurchaseOrderRepository,
     DeliveryRepository, FATTestRepository, VendorScoreRepository,
+    IndentRepository, MaterialScheduleLinkRepository,
     ProcurementRepository,
 )
 from app.modules.procurement.dtos.dtos import (
@@ -28,9 +29,11 @@ from app.modules.procurement.dtos.dtos import (
     DeliveryCreate, DeliveryUpdate, DeliveryResponse,
     FATTestCreate, FATTestUpdate, FATTestResponse,
     VendorScoreCreate, VendorScoreResponse,
+    IndentCreate, IndentUpdate, IndentResponse,
+    MaterialScheduleLinkCreate, MaterialScheduleLinkResponse,
     ProcurementDashboard, PaginatedResponse,
 )
-from app.core.enums import POStatus, DeliveryStatus, FATStatus
+from app.core.enums import POStatus, DeliveryStatus, FATStatus, IndentStatus
 
 
 # ─── Valid state transitions ───────────────────────────────────────────────────
@@ -46,6 +49,16 @@ PO_TRANSITIONS: dict[str, set[str]] = {
     POStatus.UNDER_INSPECTION: {POStatus.CLOSED},
     POStatus.CLOSED: set(),
     POStatus.CANCELLED: set(),
+}
+
+INDENT_TRANSITIONS: dict[str, set[str]] = {
+    IndentStatus.DRAFT: {IndentStatus.SUBMITTED, IndentStatus.REJECTED},
+    IndentStatus.SUBMITTED: {IndentStatus.TECH_REVIEW, IndentStatus.REJECTED},
+    IndentStatus.TECH_REVIEW: {IndentStatus.COMMERCIAL_REVIEW, IndentStatus.REJECTED},
+    IndentStatus.COMMERCIAL_REVIEW: {IndentStatus.APPROVED, IndentStatus.REJECTED},
+    IndentStatus.APPROVED: {IndentStatus.PO_ISSUED},
+    IndentStatus.PO_ISSUED: set(),
+    IndentStatus.REJECTED: set(),
 }
 
 DELIVERY_TRANSITIONS: dict[str, set[str]] = {
@@ -229,6 +242,7 @@ class PurchaseOrderService:
     def __init__(self, db: AsyncSession):
         self.repo = PurchaseOrderRepository(db)
         self.vendor_repo = VendorRepository(db)
+        self.indent_repo = IndentRepository(db)
 
     async def create_order(self, data: PurchaseOrderCreate) -> PurchaseOrderResponse:
         # Validate vendor exists
@@ -323,6 +337,52 @@ class PurchaseOrderService:
             extra["remarks"] = data.remarks
 
         po = await self.repo.update_status(po_id, data.status, **extra)
+        return PurchaseOrderResponse.model_validate(po)
+
+    async def create_from_indent(
+        self, indent_id: uuid.UUID, vendor_id: uuid.UUID, po_number: str
+    ) -> PurchaseOrderResponse:
+        """Step 6: Convert an approved indent into a Purchase Order."""
+        indent = await self.indent_repo.get_by_id(indent_id)
+        if not indent:
+            raise HTTPException(status_code=404, detail="Indent not found")
+        
+        if indent.status != IndentStatus.APPROVED:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Only APPROVED indents can be converted to PO. Current status: {indent.status}"
+            )
+
+        # Validate vendor
+        vendor = await self.vendor_repo.get_by_id(vendor_id)
+        if not vendor:
+            raise HTTPException(status_code=404, detail="Vendor not found")
+
+        # Map indent items to PO line items
+        line_items = []
+        for item in indent.items:
+            line_items.append({
+                "material_id": item.material_id,
+                "quantity": item.quantity,
+                "unit": item.unit,
+                "unit_price": Decimal("0"), # To be filled by procurement team
+                "description": f"Generated from Indent {indent.indent_number}"
+            })
+
+        po_data = {
+            "po_number": po_number,
+            "vendor_id": vendor_id,
+            "indent_id": indent_id,
+            "title": f"PO for Indent {indent.indent_number}",
+            "expected_delivery_date": indent.need_date,
+            "status": POStatus.DRAFT
+        }
+
+        po = await self.repo.create(line_items_data=line_items, **po_data)
+        
+        # Update indent status
+        await self.indent_repo.update(indent_id, status=IndentStatus.PO_ISSUED)
+        
         return PurchaseOrderResponse.model_validate(po)
 
 
@@ -597,3 +657,94 @@ class ProcurementService:
 
     async def list_orders(self):
         return await self.repo.get_all()
+
+
+# ─── Indent Service ────────────────────────────────────────────────────────────
+
+class IndentService:
+    def __init__(self, db: AsyncSession):
+        self.repo = IndentRepository(db)
+
+    async def create_indent(self, data: IndentCreate) -> IndentResponse:
+        # Check uniqueness
+        existing = await self.repo.get_by_number(data.indent_number)
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Indent number '{data.indent_number}' already exists.",
+            )
+        
+        items_data = [item.model_dump() for item in data.items]
+        indent_fields = data.model_dump(exclude={"items"})
+        
+        indent = await self.repo.create(items_data=items_data, **indent_fields)
+        return IndentResponse.model_validate(indent)
+
+    async def get_indent(self, indent_id: uuid.UUID) -> IndentResponse:
+        indent = await self.repo.get_by_id(indent_id)
+        if not indent:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Indent not found.",
+            )
+        return IndentResponse.model_validate(indent)
+
+    async def list_indents(
+        self,
+        page: int = 1,
+        page_size: int = 20,
+        status_filter: Optional[str] = None,
+    ) -> PaginatedResponse:
+        skip = (page - 1) * page_size
+        indents, total = await self.repo.get_all(
+            skip=skip, limit=page_size, status=status_filter
+        )
+        return PaginatedResponse(
+            items=[IndentResponse.model_validate(i) for i in indents],
+            total=total,
+            page=page,
+            page_size=page_size,
+            total_pages=math.ceil(total / page_size) if total else 0,
+        )
+
+    async def update_status(
+        self, indent_id: uuid.UUID, data: StatusUpdate
+    ) -> IndentResponse:
+        indent = await self.repo.get_by_id(indent_id)
+        if not indent:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Indent not found.",
+            )
+        _validate_transition(indent.status, data.status, INDENT_TRANSITIONS)
+        
+        extra = {}
+        if data.remarks:
+            extra["remarks"] = data.remarks
+            
+        indent = await self.repo.update(indent_id, status=data.status, **extra)
+        return IndentResponse.model_validate(indent)
+
+
+# ─── Material Schedule Link Service ────────────────────────────────────────────
+
+class MaterialScheduleLinkService:
+    def __init__(self, db: AsyncSession):
+        self.repo = MaterialScheduleLinkRepository(db)
+
+    async def create_link(self, data: MaterialScheduleLinkCreate) -> MaterialScheduleLinkResponse:
+        link = await self.repo.create(**data.model_dump())
+        return MaterialScheduleLinkResponse.model_validate(link)
+
+    async def get_links_for_activity(self, activity_id: uuid.UUID) -> list[MaterialScheduleLinkResponse]:
+        links = await self.repo.get_by_activity(activity_id)
+        return [MaterialScheduleLinkResponse.model_validate(l) for l in links]
+
+    async def update_link(self, link_id: uuid.UUID, data: dict) -> MaterialScheduleLinkResponse:
+        link = await self.repo.update(link_id, **data)
+        if not link:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="MaterialScheduleLink not found.",
+            )
+        return MaterialScheduleLinkResponse.model_validate(link)

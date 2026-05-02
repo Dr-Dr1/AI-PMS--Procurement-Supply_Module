@@ -18,6 +18,7 @@ from sqlalchemy.orm import selectinload
 from app.models.procurement import (
     Vendor, Material, PurchaseOrder, POLineItem,
     Delivery, DeliveryItem, FATTest, VendorScoreHistory,
+    Indent, IndentLineItem, MaterialScheduleLink,
 )
 from app.models.models import ProcurementOrder
 
@@ -448,6 +449,109 @@ class VendorScoreRepository:
             .limit(limit)
         )
         return result.scalars().all()
+
+
+# ─── Indent Repository ─────────────────────────────────────────────────────────
+
+class IndentRepository:
+    def __init__(self, db: AsyncSession):
+        self.db = db
+
+    async def create(self, items_data: list[dict], **kwargs) -> Indent:
+        indent = Indent(**kwargs)
+        for item_data in items_data:
+            indent.items.append(IndentLineItem(**item_data))
+        self.db.add(indent)
+        await self.db.commit()
+        await self.db.refresh(indent)
+        return indent
+
+    async def get_by_id(self, indent_id: uuid.UUID) -> Optional[Indent]:
+        result = await self.db.execute(
+            select(Indent)
+            .options(selectinload(Indent.items))
+            .where(Indent.id == indent_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def get_by_number(self, indent_number: str) -> Optional[Indent]:
+        result = await self.db.execute(
+            select(Indent).where(Indent.indent_number == indent_number)
+        )
+        return result.scalar_one_or_none()
+
+    async def get_all(
+        self,
+        skip: int = 0,
+        limit: int = 20,
+        status: Optional[str] = None,
+    ) -> tuple[list[Indent], int]:
+        query = select(Indent)
+        count_query = select(func.count(Indent.id))
+
+        if status:
+            query = query.where(Indent.status == status)
+            count_query = count_query.where(Indent.status == status)
+
+        total = (await self.db.execute(count_query)).scalar() or 0
+        result = await self.db.execute(
+            query.order_by(Indent.created_at.desc()).offset(skip).limit(limit)
+        )
+        return result.scalars().all(), total
+
+    async def update(self, indent_id: uuid.UUID, **kwargs) -> Optional[Indent]:
+        indent = await self.get_by_id(indent_id)
+        if not indent:
+            return None
+        for key, value in kwargs.items():
+            if value is not None:
+                setattr(indent, key, value)
+        await self.db.commit()
+        await self.db.refresh(indent)
+        return indent
+
+
+# ─── Material Schedule Link Repository ─────────────────────────────────────────
+
+class MaterialScheduleLinkRepository:
+    def __init__(self, db: AsyncSession):
+        self.db = db
+
+    async def create(self, **kwargs) -> MaterialScheduleLink:
+        link = MaterialScheduleLink(**kwargs)
+        self.db.add(link)
+        await self.db.commit()
+        await self.db.refresh(link)
+        return link
+
+    async def get_by_id(self, link_id: uuid.UUID) -> Optional[MaterialScheduleLink]:
+        result = await self.db.execute(
+            select(MaterialScheduleLink).where(MaterialScheduleLink.id == link_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def get_by_activity(self, activity_id: uuid.UUID) -> list[MaterialScheduleLink]:
+        result = await self.db.execute(
+            select(MaterialScheduleLink).where(MaterialScheduleLink.activity_id == activity_id)
+        )
+        return result.scalars().all()
+
+    async def get_by_material(self, material_id: uuid.UUID) -> list[MaterialScheduleLink]:
+        result = await self.db.execute(
+            select(MaterialScheduleLink).where(MaterialScheduleLink.material_id == material_id)
+        )
+        return result.scalars().all()
+
+    async def update(self, link_id: uuid.UUID, **kwargs) -> Optional[MaterialScheduleLink]:
+        link = await self.get_by_id(link_id)
+        if not link:
+            return None
+        for key, value in kwargs.items():
+            if value is not None:
+                setattr(link, key, value)
+        await self.db.commit()
+        await self.db.refresh(link)
+        return link
 
 
 # ─── Legacy Repository (backward compat) ───────────────────────────────────────
