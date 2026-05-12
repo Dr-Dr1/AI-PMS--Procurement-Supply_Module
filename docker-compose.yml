@@ -1,0 +1,22 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8003:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:#Lokesh123@host.docker.internal:5432/aipms_dmrc
+      - ENV=development
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        - VITE_PROCUREMENT_API_URL=http://localhost:8003
+    ports:
+      - "5176:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

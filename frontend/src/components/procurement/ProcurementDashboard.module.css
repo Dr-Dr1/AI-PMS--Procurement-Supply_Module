@@ -1,0 +1,65 @@
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.kpiCard {
+  background: #f4f7ff;
+  border-radius: 18px;
+  padding: 12px;
+  box-shadow:
+    0 5px 0 rgba(99, 132, 255, 0.16),
+    0 10px 24px rgba(99, 132, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  transition: transform 0.15s;
+}
+.kpiCard:hover { transform: translateY(-2px); }
+
+.kpiValue { font-size: 18px; font-weight: 700; line-height: 1; margin-bottom: 3px; }
+.kpiLabel { font-size: 10px; color: #7c94c8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.kpiSub { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+
+.section { margin-top: 10px; }
+
+.sectionTitle {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.chartWrap {
+  background: #f4f7ff;
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  border-radius: 18px;
+  padding: 14px 16px;
+  box-shadow:
+    0 5px 0 rgba(99, 132, 255, 0.12),
+    0 10px 24px rgba(99, 132, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+.statusBarWrap { display: flex; flex-wrap: wrap; gap: 10px 20px; }
+
+.statusBarItem { display: flex; align-items: center; gap: 6px; }
+
+.statusDot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+.statusName { font-size: 11px; font-weight: 600; color: #374151; }
+
+.statusCount {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e3a8a;
+  background: rgba(30, 58, 138, 0.08);
+  border-radius: 6px;
+  padding: 1px 6px;
+}
+
+.dim { color: #9ca3af; font-size: 13px; }
+.error { color: #dc2626; font-size: 13px; }

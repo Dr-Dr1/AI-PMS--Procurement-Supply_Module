@@ -1,0 +1,251 @@
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.toolbarTitle { font-size: 13px; font-weight: 700; color: #1e3a8a; flex: 1; }
+
+.count {
+  display: inline-block;
+  background: #2563eb20;
+  color: #2563eb;
+  border-radius: 999px;
+  font-size: 11px;
+  padding: 0 7px;
+  margin-left: 4px;
+}
+
+.filterSel {
+  padding: 5px 10px;
+  font-size: 12px;
+  border: 1.5px solid #dbeafe;
+  border-radius: 10px;
+  background: #f0f6ff;
+  color: #1e3a8a;
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+}
+
+.cpToggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e3a8a;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cpToggle input { cursor: pointer; accent-color: #2563eb; }
+
+.refreshBtn {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #f0f6ff;
+  color: #2563eb;
+  border: 1.5px solid #dbeafe;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 2px 0 #bfdbfe;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+.refreshBtn:hover { background: #dbeafe; }
+.refreshBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.addBtn {
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #1d4ed8, 0 5px 12px rgba(37, 99, 235, 0.25);
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.addBtn:hover { background: #1d4ed8; transform: translateY(-1px); }
+
+.statsBar { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+
+.stat {
+  background: #f4f7ff;
+  border-radius: 14px;
+  padding: 8px 14px;
+  text-align: center;
+  min-width: 80px;
+  box-shadow: 0 3px 0 rgba(99, 132, 255, 0.14), inset 0 1px 0 rgba(255,255,255,0.9);
+  border: 1.5px solid rgba(255,255,255,0.9);
+}
+
+.statBlue .statVal { color: #2563eb; }
+.statAmber .statVal { color: #d97706; }
+.statRed .statVal { color: #dc2626; }
+
+.statVal { font-size: 16px; font-weight: 700; color: #1e3a8a; }
+.statLabel { font-size: 10px; color: #7c94c8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.error { color: #dc2626; font-size: 12px; padding: 6px 0; }
+.dim { color: #9ca3af; font-size: 13px; }
+
+.tableWrap { overflow-x: auto; }
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  background: #f4f7ff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 0 rgba(99, 132, 255, 0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+  border: 1.5px solid rgba(255,255,255,0.9);
+}
+
+.table th {
+  background: #dce8ff;
+  color: #1e3a8a;
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 8px 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #e8f0fe;
+  color: #374151;
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td { border-bottom: none; }
+.table tbody tr:hover > td { background: #edf2ff; }
+
+.rowOverdue td { background: #fff5f5 !important; }
+.rowAtRisk td { background: #fffbeb !important; }
+
+.materialCell { font-weight: 600; color: #1e3a8a; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.monoCell { font-family: monospace; font-size: 11px; font-weight: 600; }
+
+.scoreCell {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: #f0f6ff;
+  color: #1e3a8a;
+}
+.scoreCell[data-level="HIGH"] { background: #fee2e2; color: #dc2626; }
+.scoreCell[data-level="MEDIUM"] { background: #fef3c7; color: #d97706; }
+.scoreCell[data-level="LOW"] { background: #dcfce7; color: #059669; }
+
+.cpBadge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  color: #7c3aed;
+  background: #ede9fe;
+  border-radius: 5px;
+  padding: 1px 6px;
+  letter-spacing: 0.04em;
+}
+.noCp { color: #9ca3af; }
+
+.empty { text-align: center; color: #9ca3af; font-size: 12px; padding: 20px; }
+
+.actions { display: flex; gap: 4px; align-items: center; }
+
+.actionBtn {
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  background: #f0f6ff;
+  color: #2563eb;
+  border: 1.5px solid #dbeafe;
+  border-radius: 7px;
+  cursor: pointer;
+  box-shadow: 0 2px 0 #bfdbfe;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+.actionBtn:hover { background: #dbeafe; }
+.actionBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.dangerBtn {
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  background: #fff5f5;
+  color: #dc2626;
+  border: 1.5px solid #fecaca;
+  border-radius: 7px;
+  cursor: pointer;
+  box-shadow: 0 2px 0 #fca5a5;
+  transition: all 0.12s;
+}
+.dangerBtn:hover { background: #fee2e2; }
+
+/* Form */
+.formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.colSpan2 { grid-column: span 2; }
+.fieldGroup { display: flex; flex-direction: column; gap: 4px; }
+.label { font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.cpLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+}
+.cpLabel input { cursor: pointer; accent-color: #2563eb; width: 14px; height: 14px; }
+
+.input {
+  padding: 7px 10px;
+  font-size: 12px;
+  border: 1.5px solid #dbeafe;
+  border-radius: 9px;
+  background: #fff;
+  color: #111827;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+.input:focus { border-color: #2563eb; }
+
+.submitBtn {
+  padding: 7px 18px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #1d4ed8;
+  transition: all 0.12s;
+}
+
+.cancelBtn {
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #f9fafb;
+  color: #6b7280;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 2px 0 #d1d5db;
+}
