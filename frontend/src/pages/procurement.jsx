@@ -1,20 +1,38 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { getAllProjects, getCorridorsByProject, getPackagesByProject } from '../apis/procurementApi'
-import ProcurementDashboard from '../components/procurement/ProcurementDashboard'
+import RoleProcurementDashboard from '../components/procurement/dashboard/RoleProcurementDashboard'
 import POTab from '../components/procurement/POTab'
 import GRNTab from '../components/procurement/GRNTab'
 import MaterialLinksTab from '../components/procurement/MaterialLinksTab'
+import PersonaSwitcher from '../components/identity/PersonaSwitcher'
+import { useUser } from '../context/UserContext'
 import styles from './procurement.module.css'
 
 const TABS = [
-  { id: 'dashboard',      label: 'Dashboard',      icon: '▦' },
-  { id: 'po',             label: 'PO Register',    icon: '≡' },
-  { id: 'deliveries',     label: 'Deliveries',     icon: '🚛' },
-  { id: 'material-links', label: 'Material Links', icon: '🔗' },
+  { id: 'dashboard',      label: 'Dashboard',      icon: '▦', anyOf: ['procurement.dashboard.exec','procurement.dashboard.logistics','procurement.dashboard.tender','procurement.dashboard.bim','procurement.dashboard.contract','procurement.dashboard.contractor','procurement.dashboard.pmc'] },
+  { id: 'po',             label: 'PO Register',    icon: '≡', anyOf: ['procurement.po.view'] },
+  { id: 'deliveries',     label: 'Deliveries',     icon: 'G',  anyOf: ['procurement.gr.view'] },
+  { id: 'material-links', label: 'Material Links', icon: 'M',  anyOf: ['procurement.material_link.view'] },
 ]
 
+function isAllowed(me, tab) {
+  if (!me) return false
+  if (me.is_superadmin) return true
+  if (Array.isArray(me.features) && me.features.includes('*')) return true
+  return tab.anyOf.some(f => me.features?.includes(f))
+}
+
 export default function Procurement() {
+  const { me } = useUser()
+  const visibleTabs = useMemo(() => TABS.filter(t => isAllowed(me, t)), [me])
   const [activeTab, setActiveTab] = useState('dashboard')
+
+  useEffect(() => {
+    if (!visibleTabs.length) return
+    if (!visibleTabs.find(t => t.id === activeTab)) {
+      setActiveTab(visibleTabs[0].id)
+    }
+  }, [visibleTabs, activeTab])
   const [projects, setProjects] = useState([])
   const [corridors, setCorridors] = useState([])
   const [allPackages, setAllPackages] = useState([])
@@ -73,8 +91,10 @@ export default function Procurement() {
         <span className={styles.barTitle}>Procurement</span>
         <span className={styles.barDivider} />
 
+        <PersonaSwitcher />
+
         <nav className={styles.navTabs}>
-          {TABS.map(t => (
+          {visibleTabs.map(t => (
             <button
               key={t.id}
               className={activeTab === t.id ? styles.navActive : styles.navItem}
@@ -140,7 +160,7 @@ export default function Procurement() {
           {!selectedPackageId && <p className={styles.dim}>Select a package to view procurement data.</p>}
           {selectedPackageId && (
             <>
-              {activeTab === 'dashboard'      && <ProcurementDashboard packageId={selectedPackageId} />}
+              {activeTab === 'dashboard'      && <RoleProcurementDashboard packageId={selectedPackageId} />}
               {activeTab === 'po'             && <POTab packageId={selectedPackageId} />}
               {activeTab === 'deliveries'     && <GRNTab packageId={selectedPackageId} />}
               {activeTab === 'material-links' && <MaterialLinksTab packageId={selectedPackageId} />}

@@ -12,6 +12,7 @@ from app.modules.procurement_module.po_sub_module.routers.po_router import route
 from app.modules.procurement_module.goods_receipt_sub_module.routers.grn_router import router as grn_router
 from app.modules.procurement_module.material_link_sub_module.routers.material_link_router import router as ml_router
 from app.modules.procurement_module.dashboard_sub_module.routers.dashboard_router import router as dashboard_router
+from app.modules.identity_module.routers.person_router import router as identity_router
 from app.routers.schedule_read_router import router as schedule_read_router
 
 logging.basicConfig(
@@ -60,6 +61,7 @@ app.include_router(po_router, prefix=PREFIX)
 app.include_router(grn_router, prefix=PREFIX)
 app.include_router(ml_router, prefix=PREFIX)
 app.include_router(dashboard_router, prefix=PREFIX)
+app.include_router(identity_router, prefix=PREFIX)
 app.include_router(schedule_read_router, prefix=PREFIX)
 
 
