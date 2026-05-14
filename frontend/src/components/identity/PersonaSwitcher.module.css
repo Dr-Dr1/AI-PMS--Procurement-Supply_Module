@@ -1,0 +1,73 @@
+.wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    0 4px 0 rgba(30, 58, 138, 0.18),
+    0 12px 28px rgba(30, 58, 138, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.label {
+  letter-spacing: 0.4px;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+.select {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  padding: 6px 26px 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 240px;
+  cursor: pointer;
+}
+
+.select option,
+.select optgroup {
+  background: #1e3a8a;
+  color: #fff;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.superBadge,
+.tierBadge,
+.orgBadge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.superBadge {
+  background: #fbbf24;
+  color: #78350f;
+}
+
+.tierBadge {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.orgBadge {
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}

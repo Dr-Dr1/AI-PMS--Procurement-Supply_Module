@@ -278,3 +278,36 @@ class MaterialLinkStatus(str, enum.Enum):
     ON_TRACK = "ON_TRACK"
     AT_RISK = "AT_RISK"
     OVERDUE = "OVERDUE"
+
+
+# === Procurement module RBAC features (XLSX Sheet 4 — Procurement column) ===
+
+class ProcurementFeature(str, enum.Enum):
+    # Dashboard views — logistics is its own view (XLSX: Logistics Manager = primary owner)
+    DASHBOARD_VIEW_EXEC = "procurement.dashboard.exec"
+    DASHBOARD_VIEW_LOGISTICS = "procurement.dashboard.logistics"
+    DASHBOARD_VIEW_TENDER = "procurement.dashboard.tender"
+    DASHBOARD_VIEW_BIM = "procurement.dashboard.bim"
+    DASHBOARD_VIEW_CONTRACT = "procurement.dashboard.contract"
+    DASHBOARD_VIEW_CONTRACTOR = "procurement.dashboard.contractor"
+    DASHBOARD_VIEW_PMC = "procurement.dashboard.pmc"
+
+    # PO
+    PO_VIEW = "procurement.po.view"
+    PO_CREATE = "procurement.po.create"
+    PO_APPROVE = "procurement.po.approve"
+    PO_AMEND = "procurement.po.amend"
+
+    # GRN
+    GR_VIEW = "procurement.gr.view"
+    GR_CREATE = "procurement.gr.create"
+    GR_INSPECT = "procurement.gr.inspect"
+
+    # Material Link
+    MATERIAL_LINK_VIEW = "procurement.material_link.view"
+    MATERIAL_LINK_EDIT = "procurement.material_link.edit"
+
+    # Reporting
+    VENDOR_SCORECARD_VIEW = "procurement.vendor_scorecard.view"
+    BID_COMPARE_VIEW = "procurement.bid_compare.view"
+    SPEC_VIEW = "procurement.spec.view"

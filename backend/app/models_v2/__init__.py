@@ -4,3 +4,4 @@ from app.models_v2 import structure           # noqa — schedule_v2_corridors, 
 from app.models_v2 import baseline            # noqa — schedule_v2_baselines + EVM snapshots
 from app.models_v2 import quality             # noqa — ITP, RFI, NCR, Checklist, TestRecord, PunchItem
 from app.models_v2 import procurement         # noqa — ProcurementPO, GRN, MaterialLink
+from app.models_v2 import identity            # noqa — Organization, Role, Person (shared with Quality DB)

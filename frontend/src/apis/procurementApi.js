@@ -1,7 +1,19 @@
 import axios from 'axios'
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: `${import.meta.env.VITE_PROCUREMENT_API_URL}/api/v1`,
+})
+
+// Auto-attach X-User-ID from localStorage (set by PersonaSwitcher / UserContext).
+api.interceptors.request.use((config) => {
+  const personaId = localStorage.getItem('aipms.personaId')
+  if (personaId) {
+    config.headers = config.headers || {}
+    if (!config.headers['X-User-ID']) {
+      config.headers['X-User-ID'] = personaId
+    }
+  }
+  return config
 })
 
 // ─── Schedule Read (dropdowns) ────────────────────────────────────────────────

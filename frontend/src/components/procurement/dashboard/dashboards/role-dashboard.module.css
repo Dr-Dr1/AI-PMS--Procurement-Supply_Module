@@ -1,0 +1,110 @@
+.wrap {
+  padding: 12px 4px 24px;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 11px;
+  color: #6b7280;
+  letter-spacing: 0.3px;
+}
+
+.blockGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 14px;
+}
+
+.block {
+  background: #fff;
+  border: 1.5px solid rgba(30, 58, 138, 0.12);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow:
+    0 6px 0 rgba(30, 58, 138, 0.06),
+    0 16px 36px rgba(30, 58, 138, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.blockHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.blockTitle {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1e3a8a;
+  margin: 0;
+  letter-spacing: 0.4px;
+}
+
+.blockHint {
+  font-size: 9px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+}
+
+.metric {
+  padding: 10px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid rgba(30, 58, 138, 0.08);
+}
+
+.metricValue {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.metricLabel {
+  font-size: 11px;
+  color: #475569;
+  font-weight: 600;
+}
+
+.metricHint {
+  margin-top: 4px;
+  font-size: 10px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.dim {
+  color: #6b7280;
+  font-size: 13px;
+  padding: 20px;
+}
+
+.error {
+  color: #dc2626;
+  font-size: 13px;
+  padding: 12px;
+  background: #fef2f2;
+  border-radius: 8px;
+}
