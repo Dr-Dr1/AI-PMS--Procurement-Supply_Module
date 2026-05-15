@@ -4,10 +4,12 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import BigInteger, DateTime, ForeignKey, String, Text
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
+from app.core.enums import PackageStatus
 
 
 class ScheduleV2Corridor(Base):
@@ -20,6 +22,7 @@ class ScheduleV2Corridor(Base):
     corridor_name: Mapped[str | None] = mapped_column(String(500))
     corridor_code: Mapped[str | None] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
 
 
 class ScheduleV2Package(Base):
@@ -41,6 +44,11 @@ class ScheduleV2Package(Base):
     )
     package_name: Mapped[str | None] = mapped_column(String(500))
     package_code: Mapped[str | None] = mapped_column(String(255))
+    status: Mapped[str] = mapped_column(
+        SAEnum(PackageStatus, name="package_status_enum", create_constraint=True, create_type=False),
+        nullable=False, default=PackageStatus.ACTIVE.value,
+    )
     contractor_name: Mapped[str | None] = mapped_column(String(255))
     description: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)

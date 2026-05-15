@@ -9,7 +9,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
-from app.core.enums import ContractStandard, EOTMethodology
+from app.core.enums import ContractStandard, ContractStatus, EOTMethodology
 
 
 class ScheduleV2Contract(Base):
@@ -19,6 +19,13 @@ class ScheduleV2Contract(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     contract_number: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     title: Mapped[str] = mapped_column(String(500), nullable=False)
+    description: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    status: Mapped[str] = mapped_column(
+        SAEnum(ContractStatus, name="contract_status_enum", create_constraint=True, create_type=False),
+        nullable=False, default=ContractStatus.ACTIVE.value,
+    )
+    owner_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    contractor_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
     contract_standard: Mapped[str] = mapped_column(
         SAEnum(ContractStandard, name="contract_standard_enum", create_constraint=True, create_type=False),
         nullable=False,
@@ -35,3 +42,4 @@ class ScheduleV2Contract(Base):
     ld_formula: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     notice_rules: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)

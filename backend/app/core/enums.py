@@ -39,6 +39,20 @@ class SubsystemCategory(str, enum.Enum):
     ROLLING_STOCK = "ROLLING_STOCK"
 
 
+class ContractStatus(str, enum.Enum):
+    DRAFT = "DRAFT"
+    ACTIVE = "ACTIVE"
+    SUSPENDED = "SUSPENDED"
+    COMPLETED = "COMPLETED"
+    TERMINATED = "TERMINATED"
+
+
+class PackageStatus(str, enum.Enum):
+    ACTIVE = "ACTIVE"
+    COMPLETED = "COMPLETED"
+    SUSPENDED = "SUSPENDED"
+
+
 class ContractStandard(str, enum.Enum):
     """Per expert AS06: FIDIC covers all contract types."""
     FIDIC_RED = "FIDIC_RED"

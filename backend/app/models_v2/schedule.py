@@ -47,6 +47,8 @@ class ScheduleV2Project(Base):
     completed: Mapped[int] = mapped_column(Integer, default=0)
     in_progress: Mapped[int] = mapped_column(Integer, default=0)
     not_started: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
 
 
 class ScheduleV2Activity(Base):
@@ -97,6 +99,8 @@ class ScheduleV2Activity(Base):
     baseline_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("schedule_v2_baselines.id"), nullable=True
     )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
 
 
 class ScheduleV2WBS(Base):
@@ -110,6 +114,7 @@ class ScheduleV2WBS(Base):
     parent_wbs_id: Mapped[int | None] = mapped_column(BigInteger)
     proj_id: Mapped[int | None] = mapped_column(BigInteger)
     seq_num: Mapped[int | None] = mapped_column(BigInteger)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
 
 
 class ScheduleV2Calendar(Base):
@@ -124,6 +129,7 @@ class ScheduleV2Calendar(Base):
     week_hr_cnt: Mapped[float | None] = mapped_column(Float)
     month_hr_cnt: Mapped[float | None] = mapped_column(Float)
     year_hr_cnt: Mapped[float | None] = mapped_column(Float)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
 
 
 class ScheduleV2Resource(Base):
@@ -137,6 +143,7 @@ class ScheduleV2Resource(Base):
     rsrc_type: Mapped[str | None] = mapped_column(String(100))
     email_addr: Mapped[str | None] = mapped_column(String(255))
     parent_rsrc_id: Mapped[int | None] = mapped_column(BigInteger)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
 
 
 class ScheduleV2Relationship(Base):
@@ -152,6 +159,7 @@ class ScheduleV2Relationship(Base):
     pred_type: Mapped[str | None] = mapped_column(String(100))
     lag_hr_cnt: Mapped[float | None] = mapped_column(Float)
     interface_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
 
 
 class ScheduleV2ResourceAssignment(Base):
@@ -172,6 +180,7 @@ class ScheduleV2ResourceAssignment(Base):
     act_reg_cost: Mapped[float | None] = mapped_column(Float)
     act_ot_qty: Mapped[float | None] = mapped_column(Float)
     act_ot_cost: Mapped[float | None] = mapped_column(Float)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
 
 
 class ScheduleV2Dependency(Base):
@@ -193,3 +202,4 @@ class ScheduleV2Dependency(Base):
     is_cross_package: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_cross_subsystem: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     interface_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
