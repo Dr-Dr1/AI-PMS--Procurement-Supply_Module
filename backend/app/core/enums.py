@@ -39,20 +39,6 @@ class SubsystemCategory(str, enum.Enum):
     ROLLING_STOCK = "ROLLING_STOCK"
 
 
-class ContractStatus(str, enum.Enum):
-    DRAFT = "DRAFT"
-    ACTIVE = "ACTIVE"
-    SUSPENDED = "SUSPENDED"
-    COMPLETED = "COMPLETED"
-    TERMINATED = "TERMINATED"
-
-
-class PackageStatus(str, enum.Enum):
-    ACTIVE = "ACTIVE"
-    COMPLETED = "COMPLETED"
-    SUSPENDED = "SUSPENDED"
-
-
 class ContractStandard(str, enum.Enum):
     """Per expert AS06: FIDIC covers all contract types."""
     FIDIC_RED = "FIDIC_RED"
@@ -62,6 +48,27 @@ class ContractStandard(str, enum.Enum):
     IR_GCC = "IR_GCC"
     IR_SCC = "IR_SCC"
     CUSTOM = "CUSTOM"
+
+
+class BaselineType(str, enum.Enum):
+    """CDM v1.2: distinguishes contractual programme revisions for arbitration traceability."""
+    ORIGINAL = "ORIGINAL"
+    REVISED = "REVISED"
+    CONTRACTOR_RECOVERY = "CONTRACTOR_RECOVERY"
+    AGREED_REBASELINE = "AGREED_REBASELINE"
+
+
+class EVSource(str, enum.Enum):
+    """CDM v1.2 Q07: EVM earned value must declare its progress data source."""
+    RFI_VERIFIED = "RFI_VERIFIED"
+    P6_SELF_REPORTED = "P6_SELF_REPORTED"
+    BLENDED = "BLENDED"
+
+
+class EVMPeriodType(str, enum.Enum):
+    MONTHLY = "MONTHLY"
+    WEEKLY = "WEEKLY"
+    SNAPSHOT = "SNAPSHOT"
 
 
 class EOTMethodology(str, enum.Enum):
@@ -193,40 +200,12 @@ class AuditAction(str, enum.Enum):
     LOGOUT = "LOGOUT"
 
 
-# === Baseline / EVM ===
-
-class BaselineType(str, enum.Enum):
-    ORIGINAL = "ORIGINAL"
-    REVISED = "REVISED"
-    CONTRACTOR_RECOVERY = "CONTRACTOR_RECOVERY"
-    AGREED_REBASELINE = "AGREED_REBASELINE"
-
-
-class EVSource(str, enum.Enum):
-    RFI_VERIFIED = "RFI_VERIFIED"
-    P6_SELF_REPORTED = "P6_SELF_REPORTED"
-    BLENDED = "BLENDED"
-
-
-class EVMPeriodType(str, enum.Enum):
-    MONTHLY = "MONTHLY"
-    WEEKLY = "WEEKLY"
-    SNAPSHOT = "SNAPSHOT"
-
-
-class EVMSnapshotType(str, enum.Enum):
-    BASELINE = "BASELINE"
-    ACTUAL = "ACTUAL"
-    PERIODIC = "PERIODIC"
-
-
 # === Quality Module ===
 
 class CheckpointType(str, enum.Enum):
     HOLD = "HOLD"
     WITNESS = "WITNESS"
     REVIEW = "REVIEW"
-    INFORMATIONAL = "INFORMATIONAL"
 
 
 class NCRStatus(str, enum.Enum):
@@ -265,15 +244,292 @@ class PunchItemStatus(str, enum.Enum):
     CLOSED = "CLOSED"
 
 
-# === Procurement Module ===
+# === EVM (Earned Value Management) ===
+
+class EVMSnapshotType(str, enum.Enum):
+    """Type of EVM snapshot — frozen at different points in time."""
+    BASELINE = "BASELINE"  # Frozen at baseline lock date
+    ACTUAL = "ACTUAL"      # Current progress vs baseline
+    PERIODIC = "PERIODIC"  # Scheduled/manual periodic snapshot
+
+
+# === Cost Module ===
+
+class BOQStatus(str, enum.Enum):
+    DRAFT = "DRAFT"
+    APPROVED = "APPROVED"
+    SUPERSEDED = "SUPERSEDED"
+
+
+class BOQSource(str, enum.Enum):
+    MANUAL = "MANUAL"
+    XER_IMPORT = "XER_IMPORT"
+    CSV_IMPORT = "CSV_IMPORT"
+
+
+class RABillStatus(str, enum.Enum):
+    DRAFT = "DRAFT"
+    SUBMITTED = "SUBMITTED"
+    QS_VERIFIED = "QS_VERIFIED"
+    EE_RECOMMENDED = "EE_RECOMMENDED"
+    GM_APPROVED = "GM_APPROVED"
+    CPM_APPROVED = "CPM_APPROVED"
+    FINANCE_PROCESSED = "FINANCE_PROCESSED"
+    PAID = "PAID"
+
+
+class VOCostStatus(str, enum.Enum):
+    IDENTIFIED = "IDENTIFIED"
+    SUBMITTED = "SUBMITTED"
+    ASSESSED = "ASSESSED"
+    RECOMMENDED = "RECOMMENDED"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+    IMPLEMENTED = "IMPLEMENTED"
+
+
+class VOTriggerType(str, enum.Enum):
+    SCOPE_CHANGE = "SCOPE_CHANGE"
+    DESIGN_CHANGE = "DESIGN_CHANGE"
+    UNFORESEEN_CONDITION = "UNFORESEEN_CONDITION"
+    REGULATORY = "REGULATORY"
+    OWNER_INSTRUCTION = "OWNER_INSTRUCTION"
+
+
+class CashFlowPeriod(str, enum.Enum):
+    MONTHLY = "MONTHLY"
+    QUARTERLY = "QUARTERLY"
+
+
+# === Governance / Approval ===
+
+class ApprovalChainStatus(str, enum.Enum):
+    PENDING = "PENDING"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    REJECTED = "REJECTED"
+
+
+# === Structure ===
+
+class PackageStatus(str, enum.Enum):
+    ACTIVE = "ACTIVE"
+    COMPLETED = "COMPLETED"
+    SUSPENDED = "SUSPENDED"
+
+
+# === Quality — Punch Items ===
+
+class PunchItemCategory(str, enum.Enum):
+    A = "A"
+    B = "B"
+    C = "C"
+
+
+# === Reporting Module (M09 + M12) ===
+
+class MPRStatus(str, enum.Enum):
+    DRAFT = "DRAFT"
+    SUBMITTED = "SUBMITTED"
+    APPROVED = "APPROVED"
+
+
+# === Contract ===
+
+class ContractStatus(str, enum.Enum):
+    DRAFT = "DRAFT"
+    ACTIVE = "ACTIVE"
+    SUSPENDED = "SUSPENDED"
+    COMPLETED = "COMPLETED"
+    TERMINATED = "TERMINATED"
+
+
+# === Contract Administration Module (M05) ===
+
+class NoticeType(str, enum.Enum):
+    DELAY = "DELAY"
+    VARIATION = "VARIATION"
+    CLAIM = "CLAIM"
+    FORCE_MAJEURE = "FORCE_MAJEURE"
+    TERMINATION = "TERMINATION"
+    GENERAL = "GENERAL"
+
+
+class NoticeStatus(str, enum.Enum):
+    DRAFTED = "DRAFTED"
+    ISSUED = "ISSUED"
+    ACKNOWLEDGED = "ACKNOWLEDGED"
+    RESPONDED = "RESPONDED"
+    TIME_BARRED = "TIME_BARRED"
+    DISPUTED = "DISPUTED"
+
+
+class ObligationType(str, enum.Enum):
+    RECURRING = "RECURRING"
+    MILESTONE = "MILESTONE"
+    CONDITIONAL = "CONDITIONAL"
+
+
+class ObligationStatus(str, enum.Enum):
+    PENDING = "PENDING"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    OVERDUE = "OVERDUE"
+    WAIVED = "WAIVED"
+
+
+class CorrespondenceDirection(str, enum.Enum):
+    INBOUND = "INBOUND"
+    OUTBOUND = "OUTBOUND"
+
+
+class CorrespondenceStatus(str, enum.Enum):
+    SENT = "SENT"
+    RECEIVED = "RECEIVED"
+    ACKNOWLEDGED = "ACKNOWLEDGED"
+
+
+# === Document Management Module ===
+
+class DocumentType(str, enum.Enum):
+    DRAWING = "DRAWING"
+    SPECIFICATION = "SPECIFICATION"
+    METHOD_STATEMENT = "METHOD_STATEMENT"
+    MIX_DESIGN = "MIX_DESIGN"
+    SHOP_DRAWING = "SHOP_DRAWING"
+    TEST_CERTIFICATE = "TEST_CERTIFICATE"
+    NCR = "NCR"
+    RFI = "RFI"
+    CORRESPONDENCE = "CORRESPONDENCE"
+    PHOTO = "PHOTO"
+    VIDEO = "VIDEO"
+    OTHER = "OTHER"
+
+
+class DocumentStatus(str, enum.Enum):
+    DRAFT = "DRAFT"
+    UNDER_REVIEW = "UNDER_REVIEW"
+    APPROVED = "APPROVED"
+    SUPERSEDED = "SUPERSEDED"
+    ARCHIVED = "ARCHIVED"
+
+
+class DocApprovalStatus(str, enum.Enum):
+    PENDING = "PENDING"
+    REVIEWED = "REVIEWED"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+
+
+class TransmittalStatus(str, enum.Enum):
+    DRAFT = "DRAFT"
+    ISSUED = "ISSUED"
+    ACKNOWLEDGED = "ACKNOWLEDGED"
+
+
+# ─── EHS ─────────────────────────────────────────────────────────
+
+class IncidentType(str, enum.Enum):
+    NEAR_MISS = "NEAR_MISS"
+    FIRST_AID = "FIRST_AID"
+    MTI = "MTI"
+    LTI = "LTI"
+    FATALITY = "FATALITY"
+    PROPERTY_DAMAGE = "PROPERTY_DAMAGE"
+    ENVIRONMENTAL = "ENVIRONMENTAL"
+
+
+class IncidentSeverity(str, enum.Enum):
+    MINOR = "MINOR"
+    MODERATE = "MODERATE"
+    SERIOUS = "SERIOUS"
+    MAJOR = "MAJOR"
+    CRITICAL = "CRITICAL"
+    FATAL = "FATAL"
+
+
+class InvestigationStatus(str, enum.Enum):
+    REPORTED = "REPORTED"
+    UNDER_INVESTIGATION = "UNDER_INVESTIGATION"
+    ROOT_CAUSE = "ROOT_CAUSE"
+    CAPA = "CAPA"
+    CLOSED = "CLOSED"
+
+
+class RootCauseMethod(str, enum.Enum):
+    FIVE_WHY = "FIVE_WHY"
+    FISHBONE = "FISHBONE"
+    FAULT_TREE = "FAULT_TREE"
+    BOW_TIE = "BOW_TIE"
+
+
+class PTWCategory(str, enum.Enum):
+    HOT_WORK = "HOT_WORK"
+    EXCAVATION = "EXCAVATION"
+    CONFINED_SPACE = "CONFINED_SPACE"
+    ELECTRICAL = "ELECTRICAL"
+    WORKING_AT_HEIGHT = "WORKING_AT_HEIGHT"
+    LIFTING = "LIFTING"
+    DEMOLITION = "DEMOLITION"
+    GENERAL = "GENERAL"
+
+
+class PTWStatus(str, enum.Enum):
+    DRAFT = "DRAFT"
+    PENDING_APPROVAL = "PENDING_APPROVAL"
+    APPROVED = "APPROVED"
+    ACTIVE = "ACTIVE"
+    EXPIRED = "EXPIRED"
+    CANCELLED = "CANCELLED"
+    REJECTED = "REJECTED"
+
+
+class ZoneType(str, enum.Enum):
+    STATION = "STATION"
+    VIADUCT = "VIADUCT"
+    DEPOT = "DEPOT"
+    TBM = "TBM"
+    WORK_AREA = "WORK_AREA"
+    EXCLUSION = "EXCLUSION"
+    CASTING_YARD = "CASTING_YARD"
+
+
+class CAPAStatus(str, enum.Enum):
+    OPEN = "OPEN"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    VERIFIED = "VERIFIED"
+    OVERDUE = "OVERDUE"
+
+
+class SHEPlanStatus(str, enum.Enum):
+    DRAFT = "DRAFT"
+    SUBMITTED = "SUBMITTED"
+    APPROVED = "APPROVED"
+    SUPERSEDED = "SUPERSEDED"
+
+
+# ─── Procurement ──────────────────────────────────────────────────
 
 class POStatus(str, enum.Enum):
     DRAFT = "DRAFT"
     ISSUED = "ISSUED"
     ACKNOWLEDGED = "ACKNOWLEDGED"
-    DISPATCHED = "DISPATCHED"
+    IN_TRANSIT = "IN_TRANSIT"
+    RECEIVED = "RECEIVED"
     CLOSED = "CLOSED"
+    CANCELLED = "CANCELLED"
 
+
+class MaterialLinkStatus(str, enum.Enum):
+    PENDING = "PENDING"
+    ON_TRACK = "ON_TRACK"
+    AT_RISK = "AT_RISK"
+    DELAYED = "DELAYED"
+    RECEIVED = "RECEIVED"
+
+
+# ─── Procurement-specific (Procurement Supply Module) ─────────────
 
 class GRNStatus(str, enum.Enum):
     PENDING = "PENDING"
@@ -287,14 +543,6 @@ class RiskLevel(str, enum.Enum):
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
 
-
-class MaterialLinkStatus(str, enum.Enum):
-    ON_TRACK = "ON_TRACK"
-    AT_RISK = "AT_RISK"
-    OVERDUE = "OVERDUE"
-
-
-# === Procurement module RBAC features (XLSX Sheet 4 — Procurement column) ===
 
 class ProcurementFeature(str, enum.Enum):
     # Dashboard views — logistics is its own view (XLSX: Logistics Manager = primary owner)

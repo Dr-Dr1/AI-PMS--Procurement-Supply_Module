@@ -18,8 +18,8 @@ from sqlalchemy import select
 
 from app.core.database import SessionLocal as _session_factory
 from app.models_v2.procurement import (
-    ProcurementPO, ProcurementPOLineItem,
-    ProcurementGRN, ProcurementMaterialLink,
+    PO, POLineItem,
+    GoodsReceipt, MaterialScheduleLink,
 )
 from app.core.enums import POStatus, GRNStatus, RiskLevel, MaterialLinkStatus
 
@@ -341,30 +341,30 @@ async def seed() -> None:
         counts = {k: 0 for k in ["pos", "po_items", "grns", "material_links"]}
 
         for po in PO_SEEDS:
-            if not await _exists(db, ProcurementPO, ProcurementPO.id, po["id"]):
-                db.add(ProcurementPO(**{k: v for k, v in po.items() if k not in ("created_at","updated_at")},
+            if not await _exists(db, PO, PO.id, po["id"]):
+                db.add(PO(**{k: v for k, v in po.items() if k not in ("created_at","updated_at")},
                                      created_at=NOW - timedelta(days=60),
                                      updated_at=NOW))
                 counts["pos"] += 1
         await db.flush()
 
         for li in PO_LINE_ITEM_SEEDS:
-            if not await _exists(db, ProcurementPOLineItem, ProcurementPOLineItem.id, li["id"]):
-                db.add(ProcurementPOLineItem(**{k: v for k, v in li.items() if k != "created_at"},
+            if not await _exists(db, POLineItem, POLineItem.id, li["id"]):
+                db.add(POLineItem(**{k: v for k, v in li.items() if k != "created_at"},
                                              created_at=NOW - timedelta(days=60)))
                 counts["po_items"] += 1
         await db.flush()
 
         for grn in GRN_SEEDS:
-            if not await _exists(db, ProcurementGRN, ProcurementGRN.id, grn["id"]):
-                db.add(ProcurementGRN(**{k: v for k, v in grn.items() if k != "created_at"},
+            if not await _exists(db, GoodsReceipt, GoodsReceipt.id, grn["id"]):
+                db.add(GoodsReceipt(**{k: v for k, v in grn.items() if k != "created_at"},
                                       created_at=NOW - timedelta(days=30)))
                 counts["grns"] += 1
         await db.flush()
 
         for ml in ML_SEEDS:
-            if not await _exists(db, ProcurementMaterialLink, ProcurementMaterialLink.id, ml["id"]):
-                db.add(ProcurementMaterialLink(**{k: v for k, v in ml.items() if k not in ("created_at","updated_at")},
+            if not await _exists(db, MaterialScheduleLink, MaterialScheduleLink.id, ml["id"]):
+                db.add(MaterialScheduleLink(**{k: v for k, v in ml.items() if k not in ("created_at","updated_at")},
                                                created_at=NOW - timedelta(days=60),
                                                updated_at=NOW))
                 counts["material_links"] += 1

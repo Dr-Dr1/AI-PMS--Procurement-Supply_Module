@@ -44,7 +44,7 @@ def main():
     import_id = uid()
     cur.execute(
         """
-        INSERT INTO schedule_v2_imports
+        INSERT INTO xer_imports
             (id, file_path, total_projects, total_activities, total_resources,
              total_calendars, total_wbs, total_relationships, total_corridors,
              total_packages, parse_response, created_at)
@@ -76,11 +76,11 @@ def main():
     corr1 = uid()
     corr2 = uid()
     cur.execute(
-        "INSERT INTO schedule_v2_corridors (id,import_id,proj_id,corridor_name,corridor_code,created_at) VALUES (%s,%s,%s,%s,%s,%s)",
+        "INSERT INTO corridors (id,import_id,proj_id,corridor_name,corridor_code,created_at) VALUES (%s,%s,%s,%s,%s,%s)",
         (corr1, import_id, proj_id_int, "Line 8 — Magenta Line", "L8-MG", now),
     )
     cur.execute(
-        "INSERT INTO schedule_v2_corridors (id,import_id,proj_id,corridor_name,corridor_code,created_at) VALUES (%s,%s,%s,%s,%s,%s)",
+        "INSERT INTO corridors (id,import_id,proj_id,corridor_name,corridor_code,created_at) VALUES (%s,%s,%s,%s,%s,%s)",
         (corr2, import_id, proj_id_int, "Line 7 — Pink Line Extension", "L7-PK", now),
     )
 
@@ -99,7 +99,7 @@ def main():
     for pid, cid, pname, pcode, cname in pkgs:
         cur.execute(
             """
-            INSERT INTO schedule_v2_packages
+            INSERT INTO packages
                 (id,import_id,proj_id,corridor_id,package_name,package_code,contractor_name,created_at)
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
             """,
@@ -120,7 +120,7 @@ def main():
     for pkg_id, p6id, aname in activities:
         cur.execute(
             """
-            INSERT INTO schedule_v2_activities
+            INSERT INTO activities
                 (id,import_id,p6_activity_id,activity_name,package_id,proj_id,
                  is_critical,is_near_critical,requires_rfi,requires_material)
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
@@ -164,7 +164,7 @@ def main():
         pid, pkg_id, po_num, vendor, desc, amt, curr, status, del_date, overdue = row
         cur.execute(
             """
-            INSERT INTO procurement_pos
+            INSERT INTO purchase_orders
                 (id,package_id,po_number,vendor_name,description,total_amount,currency,
                  status,committed_delivery_date,is_overdue,created_at,updated_at)
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
@@ -197,7 +197,7 @@ def main():
     for po_id, icode, idesc, unit, qty, rate, amt in line_items:
         cur.execute(
             """
-            INSERT INTO procurement_po_line_items
+            INSERT INTO po_line_items
                 (id,po_id,item_code,description,unit,quantity,unit_rate,amount,created_at)
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
             """,
@@ -219,7 +219,7 @@ def main():
     for po_id, pkg_id, grn_num, rec_date, recv_qty, ord_qty, unit, status, tc, inspector, remarks in grns_data:
         cur.execute(
             """
-            INSERT INTO procurement_grns
+            INSERT INTO goods_receipts
                 (id,po_id,package_id,grn_number,received_date,received_qty,ordered_qty,
                  unit,status,test_certificate_ref,inspector,remarks,created_at)
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
@@ -251,7 +251,7 @@ def main():
     for pkg_id, mname, act_id, po_id, is_cp, risk_score, risk_level, status, plan_date, actual_date in ml_rows:
         cur.execute(
             """
-            INSERT INTO procurement_material_links
+            INSERT INTO material_links
                 (id,package_id,material_name,activity_id,po_id,is_critical_path,
                  risk_score,risk_level,status,planned_delivery_date,actual_delivery_date,
                  created_at,updated_at)
@@ -282,15 +282,15 @@ if __name__ == "__main__":
     if "--reset" in sys.argv:
         conn = psycopg2.connect(DSN)
         cur = conn.cursor()
-        cur.execute("DELETE FROM procurement_material_links")
-        cur.execute("DELETE FROM procurement_grns")
-        cur.execute("DELETE FROM procurement_po_line_items")
-        cur.execute("DELETE FROM procurement_pos")
-        cur.execute("DELETE FROM schedule_v2_activities WHERE import_id IN (SELECT id FROM schedule_v2_imports WHERE file_path='/seed/cc21_seed.xer')")
-        cur.execute("DELETE FROM schedule_v2_packages WHERE import_id IN (SELECT id FROM schedule_v2_imports WHERE file_path='/seed/cc21_seed.xer')")
-        cur.execute("DELETE FROM schedule_v2_corridors WHERE import_id IN (SELECT id FROM schedule_v2_imports WHERE file_path='/seed/cc21_seed.xer')")
+        cur.execute("DELETE FROM material_links")
+        cur.execute("DELETE FROM goods_receipts")
+        cur.execute("DELETE FROM po_line_items")
+        cur.execute("DELETE FROM purchase_orders")
+        cur.execute("DELETE FROM activities WHERE import_id IN (SELECT id FROM xer_imports WHERE file_path='/seed/cc21_seed.xer')")
+        cur.execute("DELETE FROM packages WHERE import_id IN (SELECT id FROM xer_imports WHERE file_path='/seed/cc21_seed.xer')")
+        cur.execute("DELETE FROM corridors WHERE import_id IN (SELECT id FROM xer_imports WHERE file_path='/seed/cc21_seed.xer')")
         cur.execute("DELETE FROM schedule_v2_projects WHERE proj_short_name='CC-21'")
-        cur.execute("DELETE FROM schedule_v2_imports WHERE file_path='/seed/cc21_seed.xer'")
+        cur.execute("DELETE FROM xer_imports WHERE file_path='/seed/cc21_seed.xer'")
         conn.commit()
         cur.close()
         conn.close()

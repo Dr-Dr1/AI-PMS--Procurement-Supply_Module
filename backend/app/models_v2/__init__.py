@@ -1,7 +1,27 @@
-from app.models_v2 import contract_schedule   # noqa — schedule_v2_contracts (must be before structure)
-from app.models_v2 import schedule            # noqa — schedule_v2_imports + core schedule tables
-from app.models_v2 import structure           # noqa — schedule_v2_corridors, schedule_v2_packages
-from app.models_v2 import baseline            # noqa — schedule_v2_baselines + EVM snapshots
-from app.models_v2 import quality             # noqa — ITP, RFI, NCR, Checklist, TestRecord, PunchItem
-from app.models_v2 import procurement         # noqa — ProcurementPO, GRN, MaterialLink
-from app.models_v2 import identity            # noqa — Organization, Role, Person (shared with Quality DB)
+from app.models_v2.identity import Organization, Role, Person
+from app.models_v2.imports import XERImport
+from app.models_v2.schedule import Project, Activity, WBS, Calendar, Resource, Relationship, ResourceAssignment, Dependency
+from app.models_v2.structure import Corridor, Package
+from app.models_v2.baseline import Baseline, BaselineHistory, EVMSnapshot, ActivityBaselineLink
+from app.models_v2.contract import Contract, Clause, Notice, Obligation, Correspondence
+from app.models_v2.quality import ITP, ITPCheckpoint, RFI, NCR, ChecklistTemplate, ChecklistResponse, TestRecord, PunchItem, DPR
+from app.models_v2.ehs import Zone, CAPA, Incident, PTW, ToolboxTalk, SHEPlan
+from app.models_v2.procurement import PO, POLineItem, GoodsReceipt, MaterialScheduleLink
+from app.models_v2.cost import BOQ, BOQItem, RABill, RABillItem, Measurement, DeductionConfig, VariationOrder, CashFlowProjection
+from app.models_v2.document_management import Document, Drawing, ApprovalRecord, Transmittal, TransmittalItem
+from app.models_v2.governance import ApprovalChain, ApprovalChainStep, AuditLog
+
+__all__ = [
+    "Organization", "Role", "Person",
+    "XERImport",
+    "Project", "Activity", "WBS", "Calendar", "Resource", "Relationship", "ResourceAssignment", "Dependency",
+    "Corridor", "Package",
+    "Baseline", "BaselineHistory", "EVMSnapshot", "ActivityBaselineLink",
+    "Contract", "Clause", "Notice", "Obligation", "Correspondence",
+    "ITP", "ITPCheckpoint", "RFI", "NCR", "ChecklistTemplate", "ChecklistResponse", "TestRecord", "PunchItem", "DPR",
+    "Zone", "CAPA", "Incident", "PTW", "ToolboxTalk", "SHEPlan",
+    "PO", "POLineItem", "GoodsReceipt", "MaterialScheduleLink",
+    "BOQ", "BOQItem", "RABill", "RABillItem", "Measurement", "DeductionConfig", "VariationOrder", "CashFlowProjection",
+    "Document", "Drawing", "ApprovalRecord", "Transmittal", "TransmittalItem",
+    "ApprovalChain", "ApprovalChainStep", "AuditLog",
+]

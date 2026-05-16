@@ -1,4 +1,4 @@
-from uuid import UUID
+﻿from uuid import UUID
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,7 +24,7 @@ class PersonService:
             if not role or not org:
                 continue
             cards.append(PersonaCardDTO(
-                person_id=p.person_id,
+                person_id=p.id,
                 name=p.name,
                 email=p.email,
                 role_code=role.role_code,
@@ -45,14 +45,14 @@ class PersonService:
         if not role or not org:
             raise HTTPException(500, detail="Person has dangling role/org reference")
         return MeDTO(
-            person_id=p.person_id,
+            person_id=p.id,
             name=p.name,
             email=p.email,
             role_code=role.role_code,
             role_name=role.role_name,
             rbac_tier=p.rbac_tier,
             ai_access_level=p.ai_access_level,
-            org_id=org.org_id,
+            org_id=org.id,
             org_name=org.org_name,
             org_type=org.org_type,
             packages=p.packages,

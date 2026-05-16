@@ -1,9 +1,9 @@
 """
 Procurement module ORM models — 4 entities.
 
-ProcurementPO → ProcurementPOLineItem (1:N)
-ProcurementPO → ProcurementGRN (1:N)
-ProcurementPO → ProcurementMaterialLink (1:N, nullable)
+PO → POLineItem (1:N)
+PO → GoodsReceipt (1:N)
+PO → MaterialScheduleLink (1:N, nullable)
 """
 
 import uuid
@@ -21,8 +21,8 @@ from app.core.database import Base
 from app.core.enums import POStatus, GRNStatus, RiskLevel, MaterialLinkStatus
 
 
-class ProcurementPO(Base):
-    __tablename__ = "procurement_pos"
+class PO(Base):
+    __tablename__ = "purchase_orders"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     package_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
@@ -42,21 +42,21 @@ class ProcurementPO(Base):
         DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow
     )
 
-    items: Mapped[list["ProcurementPOLineItem"]] = relationship(
+    items: Mapped[list["POLineItem"]] = relationship(
         back_populates="po", cascade="all, delete-orphan", lazy="selectin"
     )
-    grns: Mapped[list["ProcurementGRN"]] = relationship(back_populates="po")
-    material_links: Mapped[list["ProcurementMaterialLink"]] = relationship(back_populates="po")
+    grns: Mapped[list["GoodsReceipt"]] = relationship(back_populates="po")
+    material_links: Mapped[list["MaterialScheduleLink"]] = relationship(back_populates="po")
 
-    __table_args__ = (Index("ix_procurement_pos_package_id", "package_id"),)
+    __table_args__ = (Index("ix_purchase_orders_package_id", "package_id"),)
 
 
-class ProcurementPOLineItem(Base):
-    __tablename__ = "procurement_po_line_items"
+class POLineItem(Base):
+    __tablename__ = "po_line_items"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     po_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("procurement_pos.id", ondelete="CASCADE"), nullable=False, index=True
+        ForeignKey("purchase_orders.id", ondelete="CASCADE"), nullable=False, index=True
     )
     item_code: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
@@ -66,14 +66,14 @@ class ProcurementPOLineItem(Base):
     amount: Mapped[Decimal] = mapped_column(Numeric(15, 2), nullable=False, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
 
-    po: Mapped["ProcurementPO"] = relationship(back_populates="items")
+    po: Mapped["PO"] = relationship(back_populates="items")
 
 
-class ProcurementGRN(Base):
-    __tablename__ = "procurement_grns"
+class GoodsReceipt(Base):
+    __tablename__ = "goods_receipts"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    po_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("procurement_pos.id"), nullable=False, index=True)
+    po_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("purchase_orders.id"), nullable=False, index=True)
     package_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
     grn_number: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     received_date: Mapped[date] = mapped_column(Date, nullable=False)
@@ -89,22 +89,22 @@ class ProcurementGRN(Base):
     remarks: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
 
-    po: Mapped["ProcurementPO"] = relationship(back_populates="grns")
+    po: Mapped["PO"] = relationship(back_populates="grns")
 
     __table_args__ = (
-        Index("ix_procurement_grns_package_id", "package_id"),
-        Index("ix_procurement_grns_po_id", "po_id"),
+        Index("ix_goods_receipts_package_id", "package_id"),
+        Index("ix_goods_receipts_po_id", "po_id"),
     )
 
 
-class ProcurementMaterialLink(Base):
-    __tablename__ = "procurement_material_links"
+class MaterialScheduleLink(Base):
+    __tablename__ = "material_links"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     package_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
     material_name: Mapped[str] = mapped_column(String(300), nullable=False)
     activity_id: Mapped[str | None] = mapped_column(String(200))
-    po_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("procurement_pos.id"), index=True)
+    po_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("purchase_orders.id"), index=True)
     is_critical_path: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     risk_score: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     risk_level: Mapped[str] = mapped_column(
@@ -123,6 +123,6 @@ class ProcurementMaterialLink(Base):
         DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow
     )
 
-    po: Mapped["ProcurementPO | None"] = relationship(back_populates="material_links")
+    po: Mapped["PO | None"] = relationship(back_populates="material_links")
 
-    __table_args__ = (Index("ix_procurement_material_links_package_id", "package_id"),)
+    __table_args__ = (Index("ix_material_links_package_id", "package_id"),)

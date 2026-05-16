@@ -5,7 +5,7 @@ from datetime import date, datetime
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models_v2.procurement import ProcurementPO, ProcurementGRN, ProcurementMaterialLink
+from app.models_v2.procurement import PO, GoodsReceipt, MaterialScheduleLink
 from app.core.enums import POStatus, MaterialLinkStatus
 
 
@@ -18,9 +18,9 @@ class DashboardRepository:
         now = datetime.utcnow()
 
         # PO stats
-        po_q = select(ProcurementPO)
+        po_q = select(PO)
         if package_id:
-            po_q = po_q.where(ProcurementPO.package_id == package_id)
+            po_q = po_q.where(PO.package_id == package_id)
         pos = list((await self.db.execute(po_q)).scalars().all())
 
         total_pos = len(pos)
@@ -36,9 +36,9 @@ class DashboardRepository:
                 overdue += 1
 
         # GRN stats
-        grn_q = select(ProcurementGRN)
+        grn_q = select(GoodsReceipt)
         if package_id:
-            grn_q = grn_q.where(ProcurementGRN.package_id == package_id)
+            grn_q = grn_q.where(GoodsReceipt.package_id == package_id)
         grns = list((await self.db.execute(grn_q)).scalars().all())
 
         total_grns = len(grns)
@@ -50,9 +50,9 @@ class DashboardRepository:
         )
 
         # Material link stats
-        ml_q = select(ProcurementMaterialLink)
+        ml_q = select(MaterialScheduleLink)
         if package_id:
-            ml_q = ml_q.where(ProcurementMaterialLink.package_id == package_id)
+            ml_q = ml_q.where(MaterialScheduleLink.package_id == package_id)
         links = list((await self.db.execute(ml_q)).scalars().all())
 
         total_links = len(links)

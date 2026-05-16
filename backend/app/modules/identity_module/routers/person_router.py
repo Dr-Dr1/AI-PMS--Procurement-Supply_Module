@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+﻿from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -21,7 +21,7 @@ async def get_me(
     person: Person = Depends(get_current_person),
     db: AsyncSession = Depends(get_db),
 ):
-    return await PersonService(db).get_me(person.person_id)
+    return await PersonService(db).get_me(person.id)
 
 
 @router.get("/roles", response_model=list[RoleDTO])

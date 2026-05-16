@@ -1,24 +1,22 @@
-# Re-exports for backward compatibility with any imports using ReadOnly aliases.
-# Full model definitions live in schedule.py / structure.py / baseline.py.
-
+# Re-exports for backward compatibility.
+from app.models_v2.imports import XERImport as XERImportReadOnly  # noqa: F401
 from app.models_v2.schedule import (         # noqa: F401
-    ScheduleV2Import       as ScheduleV2ImportReadOnly,
-    ScheduleV2Project      as ScheduleV2ProjectReadOnly,
-    ScheduleV2Activity     as ScheduleV2ActivityReadOnly,
-    ScheduleV2WBS          as ScheduleV2WBSReadOnly,
-    ScheduleV2Calendar     as ScheduleV2CalendarReadOnly,
-    ScheduleV2Resource     as ScheduleV2ResourceReadOnly,
-    ScheduleV2Relationship as ScheduleV2RelationshipReadOnly,
-    ScheduleV2ResourceAssignment as ScheduleV2ResourceAssignmentReadOnly,
-    ScheduleV2Dependency   as ScheduleV2DependencyReadOnly,
+    Project      as ProjectReadOnly,
+    Activity     as ActivityReadOnly,
+    WBS          as WBSReadOnly,
+    Calendar     as CalendarReadOnly,
+    Resource     as ResourceReadOnly,
+    Relationship as RelationshipReadOnly,
+    ResourceAssignment as ResourceAssignmentReadOnly,
+    Dependency   as DependencyReadOnly,
 )
 from app.models_v2.structure import (        # noqa: F401
-    ScheduleV2Corridor as ScheduleV2CorridorReadOnly,
-    ScheduleV2Package  as ScheduleV2PackageReadOnly,
+    Corridor as CorridorReadOnly,
+    Package  as PackageReadOnly,
 )
 from app.models_v2.baseline import (         # noqa: F401
-    ScheduleV2Baseline             as ScheduleV2BaselineReadOnly,
-    ScheduleV2BaselineHistory      as ScheduleV2BaselineHistoryReadOnly,
-    ScheduleV2EVMSnapshot          as ScheduleV2EVMSnapshotReadOnly,
-    ScheduleV2ActivityBaselineLink as ScheduleV2ActivityBaselineLinkReadOnly,
+    Baseline             as BaselineReadOnly,
+    BaselineHistory      as BaselineHistoryReadOnly,
+    EVMSnapshot          as EVMSnapshotReadOnly,
+    ActivityBaselineLink as ActivityBaselineLinkReadOnly,
 )

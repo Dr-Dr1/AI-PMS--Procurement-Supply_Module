@@ -5,23 +5,23 @@ from datetime import date
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models_v2.procurement import ProcurementGRN
+from app.models_v2.procurement import GoodsReceipt
 
 
 class GRNRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create(self, data: dict) -> ProcurementGRN:
-        grn = ProcurementGRN(**data)
+    async def create(self, data: dict) -> GoodsReceipt:
+        grn = GoodsReceipt(**data)
         self.db.add(grn)
         await self.db.flush()
         await self.db.refresh(grn)
         return grn
 
-    async def get_by_id(self, grn_id: UUID) -> Optional[ProcurementGRN]:
+    async def get_by_id(self, grn_id: UUID) -> Optional[GoodsReceipt]:
         result = await self.db.execute(
-            select(ProcurementGRN).where(ProcurementGRN.id == grn_id)
+            select(GoodsReceipt).where(GoodsReceipt.id == grn_id)
         )
         return result.scalar_one_or_none()
 
@@ -31,13 +31,13 @@ class GRNRepository:
         po_id: Optional[UUID] = None,
         date_from: Optional[date] = None,
         date_to: Optional[date] = None,
-    ) -> list[ProcurementGRN]:
-        q = select(ProcurementGRN).where(ProcurementGRN.package_id == package_id)
+    ) -> list[GoodsReceipt]:
+        q = select(GoodsReceipt).where(GoodsReceipt.package_id == package_id)
         if po_id:
-            q = q.where(ProcurementGRN.po_id == po_id)
+            q = q.where(GoodsReceipt.po_id == po_id)
         if date_from:
-            q = q.where(ProcurementGRN.received_date >= date_from)
+            q = q.where(GoodsReceipt.received_date >= date_from)
         if date_to:
-            q = q.where(ProcurementGRN.received_date <= date_to)
-        result = await self.db.execute(q.order_by(ProcurementGRN.received_date.desc()))
+            q = q.where(GoodsReceipt.received_date <= date_to)
+        result = await self.db.execute(q.order_by(GoodsReceipt.received_date.desc()))
         return list(result.scalars().all())

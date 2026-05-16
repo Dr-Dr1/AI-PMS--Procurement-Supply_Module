@@ -59,7 +59,7 @@ alembic upgrade head
 
 ### 7. Start Server
 ```bash
-uvicorn app.main:app --reload
+python -m app.main
 ```
 
 Server runs at: `http://localhost:8000`

@@ -1,4 +1,4 @@
-from uuid import UUID
+﻿from uuid import UUID
 from typing import Sequence
 
 from sqlalchemy import select
@@ -14,7 +14,7 @@ class PersonRepository:
 
     async def get_by_id(self, person_id: UUID) -> Person | None:
         result = await self.db.execute(
-            select(Person).where(Person.person_id == person_id),
+            select(Person).where(Person.id == person_id),
         )
         return result.scalar_one_or_none()
 
@@ -26,13 +26,13 @@ class PersonRepository:
 
     async def get_role(self, role_id: UUID) -> Role | None:
         result = await self.db.execute(
-            select(Role).where(Role.role_id == role_id),
+            select(Role).where(Role.id == role_id),
         )
         return result.scalar_one_or_none()
 
     async def get_org(self, org_id: UUID) -> Organization | None:
         result = await self.db.execute(
-            select(Organization).where(Organization.org_id == org_id),
+            select(Organization).where(Organization.id == org_id),
         )
         return result.scalar_one_or_none()
 

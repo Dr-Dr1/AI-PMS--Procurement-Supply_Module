@@ -12,10 +12,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.models_v2.schedule_readonly import (
-    ScheduleV2ProjectReadOnly,
-    ScheduleV2CorridorReadOnly,
-    ScheduleV2PackageReadOnly,
-    ScheduleV2ActivityReadOnly,
+    ProjectReadOnly,
+    CorridorReadOnly,
+    PackageReadOnly,
+    ActivityReadOnly,
 )
 
 router = APIRouter(tags=["Schedule — Read Only"])
@@ -23,7 +23,7 @@ router = APIRouter(tags=["Schedule — Read Only"])
 
 @router.get("/projects")
 async def list_projects(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(ScheduleV2ProjectReadOnly))
+    result = await db.execute(select(ProjectReadOnly))
     projects = result.scalars().all()
     return {
         "message": "Projects fetched",
@@ -45,9 +45,9 @@ async def list_projects(db: AsyncSession = Depends(get_db)):
 
 @router.get("/corridors")
 async def list_corridors(proj_id: Optional[int] = None, db: AsyncSession = Depends(get_db)):
-    stmt = select(ScheduleV2CorridorReadOnly)
+    stmt = select(CorridorReadOnly)
     if proj_id is not None:
-        stmt = stmt.where(ScheduleV2CorridorReadOnly.proj_id == proj_id)
+        stmt = stmt.where(CorridorReadOnly.proj_id == proj_id)
     result = await db.execute(stmt)
     corridors = result.scalars().all()
     return {
@@ -67,9 +67,9 @@ async def list_corridors(proj_id: Optional[int] = None, db: AsyncSession = Depen
 
 @router.get("/packages")
 async def list_packages(corridor_id: Optional[UUID] = None, db: AsyncSession = Depends(get_db)):
-    stmt = select(ScheduleV2PackageReadOnly)
+    stmt = select(PackageReadOnly)
     if corridor_id:
-        stmt = stmt.where(ScheduleV2PackageReadOnly.corridor_id == corridor_id)
+        stmt = stmt.where(PackageReadOnly.corridor_id == corridor_id)
     result = await db.execute(stmt)
     packages = result.scalars().all()
     return {
@@ -91,7 +91,7 @@ async def list_packages(corridor_id: Optional[UUID] = None, db: AsyncSession = D
 @router.get("/packages/{package_id}")
 async def get_package(package_id: UUID, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
-        select(ScheduleV2PackageReadOnly).where(ScheduleV2PackageReadOnly.id == package_id)
+        select(PackageReadOnly).where(PackageReadOnly.id == package_id)
     )
     pkg = result.scalar_one_or_none()
     if not pkg:
@@ -110,8 +110,8 @@ async def get_package(package_id: UUID, db: AsyncSession = Depends(get_db)):
 
 @router.get("/activities/package/{package_id}")
 async def list_activities_by_package(package_id: UUID, db: AsyncSession = Depends(get_db)):
-    stmt = select(ScheduleV2ActivityReadOnly).where(
-        ScheduleV2ActivityReadOnly.package_id == package_id
+    stmt = select(ActivityReadOnly).where(
+        ActivityReadOnly.package_id == package_id
     )
     result = await db.execute(stmt)
     activities = result.scalars().all()

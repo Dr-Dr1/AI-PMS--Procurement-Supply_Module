@@ -1,4 +1,4 @@
-from typing import Optional
+﻿from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
@@ -12,7 +12,7 @@ from app.modules.procurement_module.dashboard_sub_module.services.service import
 from app.modules.procurement_module.dashboard_sub_module.services.role_dashboard_service import RoleDashboardService
 from app.modules.identity_module.dependencies import get_current_person, get_current_person_role_code
 
-router = APIRouter(prefix="/procurement/dashboard", tags=["Procurement — Dashboard"])
+router = APIRouter(prefix="/procurement/dashboard", tags=["Procurement â€” Dashboard"])
 
 
 @router.get("/me", response_model=RoleDashboardDTO)
@@ -24,7 +24,7 @@ async def get_my_dashboard(
 ):
     """Role-aware Procurement dashboard. 7 builders incl. logistics (primary owner per XLSX)."""
     return await RoleDashboardService(db).get_my_dashboard(
-        package_id=package_id, role_code=role_code, person_id=person.person_id,
+        package_id=package_id, role_code=role_code, person_id=person.id,
     )
 
 

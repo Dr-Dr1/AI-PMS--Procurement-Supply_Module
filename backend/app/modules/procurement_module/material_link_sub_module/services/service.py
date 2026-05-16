@@ -8,7 +8,7 @@ from app.modules.procurement_module.material_link_sub_module.dtos.request_dtos i
     MaterialLinkCreateDTO, MaterialLinkUpdateDTO,
 )
 from app.modules.procurement_module.material_link_sub_module.repositories.repository import MaterialLinkRepository
-from app.models_v2.procurement import ProcurementMaterialLink
+from app.models_v2.procurement import MaterialScheduleLink
 from app.core.enums import RiskLevel, MaterialLinkStatus
 
 
@@ -53,7 +53,7 @@ class MaterialLinkService:
     def __init__(self, db: AsyncSession):
         self.repo = MaterialLinkRepository(db)
 
-    async def create(self, payload: MaterialLinkCreateDTO) -> ProcurementMaterialLink:
+    async def create(self, payload: MaterialLinkCreateDTO) -> MaterialScheduleLink:
         data = payload.model_dump()
         score, level, status = _calc_risk(
             data.get("planned_delivery_date"),
@@ -66,7 +66,7 @@ class MaterialLinkService:
         data["last_risk_refresh"] = datetime.utcnow()
         return await self.repo.create(data)
 
-    async def get_by_id(self, link_id: UUID) -> ProcurementMaterialLink:
+    async def get_by_id(self, link_id: UUID) -> MaterialScheduleLink:
         link = await self.repo.get_by_id(link_id)
         if not link:
             raise ValueError(f"Material link {link_id} not found")
@@ -77,10 +77,10 @@ class MaterialLinkService:
         package_id: UUID,
         risk_level: Optional[str] = None,
         on_critical_path: Optional[bool] = None,
-    ) -> list[ProcurementMaterialLink]:
+    ) -> list[MaterialScheduleLink]:
         return await self.repo.list_by_package(package_id, risk_level, on_critical_path)
 
-    async def update(self, link_id: UUID, payload: MaterialLinkUpdateDTO) -> ProcurementMaterialLink:
+    async def update(self, link_id: UUID, payload: MaterialLinkUpdateDTO) -> MaterialScheduleLink:
         link = await self.get_by_id(link_id)
         data = payload.model_dump(exclude_none=True)
         updated = await self.repo.update(link, data)
@@ -91,7 +91,7 @@ class MaterialLinkService:
         link = await self.get_by_id(link_id)
         await self.repo.delete(link)
 
-    async def refresh_risk(self, link_id: UUID) -> ProcurementMaterialLink:
+    async def refresh_risk(self, link_id: UUID) -> MaterialScheduleLink:
         link = await self.get_by_id(link_id)
         score, level, status = _calc_risk(
             link.planned_delivery_date,
