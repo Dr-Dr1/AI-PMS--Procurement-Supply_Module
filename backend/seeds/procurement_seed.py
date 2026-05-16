@@ -16,7 +16,7 @@ from decimal import Decimal
 
 from sqlalchemy import select
 
-from app.core.database import SessionLocal as _session_factory
+from app.core.database import async_session as async_session_factory
 from app.models_v2.procurement import (
     PO, POLineItem,
     GoodsReceipt, MaterialScheduleLink,
@@ -337,7 +337,7 @@ async def _exists(db, model, pk_col, pk_val) -> bool:
 
 
 async def seed() -> None:
-    async with _session_factory() as db:
+    async with async_session_factory() as db:
         counts = {k: 0 for k in ["pos", "po_items", "grns", "material_links"]}
 
         for po in PO_SEEDS:

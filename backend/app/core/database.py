@@ -10,6 +10,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
+async_session = SessionLocal  # alias for seed scripts
 
 
 async def get_db():
