@@ -15,11 +15,14 @@ Procurement tracks the movement of materials onto a construction site. The lifec
 
 ### Reading List (in order)
 
-1. `D:\AI-PMS--Procurement-Supply_Module\CLAUDE.md`  
-   → **Most important file.** Contains hard rules, model import order, FK safety, and architecture decisions. Memorize it.
+1. `D:\AI-PMS--Procurement-Supply_Module\README.md`  
+   → **Start here.** Full module overview, stack, start commands, seed instructions
 
-2. `D:\AI-PMS--Procurement-Supply_Module\README.md`  
-   → Full module overview
+2. **Key architecture rules to memorize (from README):**
+   - Model import order (FK safety): `contract_schedule → schedule → structure → baseline → quality → procurement`
+   - GRNs are immutable — no edit/delete endpoints, creation only
+   - `activity_id` in MaterialLink stores P6 activity ID string (e.g. `"A1001"`), NOT a UUID
+   - `echo=True` in `database.py` — SQLAlchemy prints all SQL to terminal (useful for debugging)
 
 3. **PO state machine** — find it in code:
    `backend/app/modules/procurement_module/po_sub_module/service.py`  
